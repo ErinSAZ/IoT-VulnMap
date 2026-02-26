@@ -1,0 +1,78 @@
+{
+  "scan_date": "2026-02-26 16:49:05",
+  "total": 12,
+  "devices": [
+    {
+      "manufacturer": "Home Assistant",
+      "model": "Home Assistant Core",
+      "sw_version": "2026.2.3",
+      "name": "Home Assistant Core"
+    },
+    {
+      "manufacturer": "Home Assistant",
+      "model": "Home Assistant Supervisor",
+      "sw_version": "2026.02.2",
+      "name": "Home Assistant Supervisor"
+    },
+    {
+      "manufacturer": "Home Assistant",
+      "model": "Home Assistant Host",
+      "sw_version": "N/A",
+      "name": "Home Assistant Host"
+    },
+    {
+      "manufacturer": "Home Assistant",
+      "model": "Home Assistant Operating System",
+      "sw_version": "17.1",
+      "name": "Home Assistant Operating System"
+    },
+    {
+      "manufacturer": "Home Assistant",
+      "model": "Home Assistant Backup",
+      "sw_version": "2026.2.3",
+      "name": "Backup"
+    },
+    {
+      "manufacturer": "Google Inc.",
+      "model": "Google Nest Mini",
+      "sw_version": "N/A",
+      "name": "Nest-Mini-1"
+    },
+    {
+      "manufacturer": "Google Inc.",
+      "model": "Google Nest Hub",
+      "sw_version": "N/A",
+      "name": "Nest-Hub-1"
+    },
+    {
+      "manufacturer": "Tuya",
+      "model": "LSC Smart Power Plug",
+      "sw_version": "N/A",
+      "name": "Smart-Plug-1"
+    },
+    {
+      "manufacturer": "Tuya",
+      "model": "Smart Plug",
+      "sw_version": "N/A",
+      "name": "Smart-Plug-2"
+    },
+    {
+      "manufacturer": "IKEA of Sweden",
+      "model": "KAJPLATS E14 CWS globe 806lm",
+      "sw_version": "1.2.0",
+      "name": "Light-1"
+    },
+    {
+      "manufacturer": "IKEA of Sweden",
+      "model": "KAJPLATS E27 WS globe 1521lm",
+      "sw_version": "1.2.0",
+      "name": "Light-2"
+    },
+    {
+      "manufacturer": "IKEA of Sweden",
+      "model": "BILRESA scroll wheel",
+      "sw_version": "1.8.7",
+      "name": "Scroll-wheel"
+    }
+  ]
+}
