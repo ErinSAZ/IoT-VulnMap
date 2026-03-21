@@ -1,5 +1,5 @@
 from application.app.find_devices import get_devices
-from application.db.connection import get_connection
+
 
 def main():
     print("=== IoT Security Scanner ===")

@@ -4,7 +4,7 @@
 import json
 import os
 import websocket
-from application.db.connection import get_connection
+from application.app.database import *
 from dotenv import load_dotenv
 
 # Configurations
@@ -48,30 +48,16 @@ def get_devices():
             "name": device.get('name_by_user') or device.get('name') or "N/A",
         }
 
-        connection = get_connection()
-        cursor = connection.cursor() # for send object to database
-
         # Insert vendor data into VENDOR database
-        cursor.execute("SELECT id FROM Vendor WHERE name_ha = %s", (entry['manufacturer'], ))
-        existing_vendor = cursor.fetchone()
-
-        if existing_vendor is None:
-            cursor.execute("INSERT INTO Vendor (name_ha) values (%s)", (entry['manufacturer'], ))
-            vendor_id = cursor.lastrowid
+        if vendor_exists(entry['manufacturer']) is None:
+            vendor_id = add_vendor(entry['manufacturer'])
         else:
-            vendor_id = existing_vendor[0]
+            vendor_id = vendor_exists(entry['manufacturer'])[0]
 
         # Insert device data into DEVICE database
-        cursor.execute("SELECT id FROM Device WHERE name = %s AND model = %s", (entry['name'], entry['model']))
-        existing_device = cursor.fetchone()
+        existing_device = device_exists(entry['name'],entry['model'])
 
         if existing_device is None:
-            cursor.execute("INSERT INTO Device   (name, model,os_version, vendor_id) values (%s, %s, %s, %s)",
-                           (entry['name'], entry['model'], entry['sw_version'], vendor_id))
-
-
-        connection.commit()
-        cursor.close()
-        connection.close()
+            add_device(entry['name'],entry['model'],entry['sw_version'],vendor_id)
 
     return None
