@@ -2,6 +2,8 @@ import json
 import requests
 from rapidfuzz.distance.metrics_cpp import levenshtein_distance
 
+# API requests
+
 def get_vendors():
     """
     Fetch the list of vendors from CIRCL's API.
@@ -29,21 +31,41 @@ def get_vulnerabilities(vendor, product):
     content = requests.get(f"https://vulnerability.circl.lu/api/search/{vendor}/{product}")
     return json.loads(content.text)
 
-def find_closest_vendor(vendor_name, vendors):
+
+# Custom functions
+
+def vendor_exists(searched_vendor, vendors=get_vendors()):
     """
-    Find the closest matching vendor name from the list of vendors using fuzzy matching.
-    :param vendor_name: input vendor name
-    :param vendors: list of available vendors
+    Check if a given vendor exists in CIRCL's API.
+    :param searched_vendor: vendor name
+    :param vendors: list of vendors
+    :return: True if the vendor exists, False otherwise
+    """
+    low_vendor = searched_vendor.lower()
+
+    for vendor in vendors:
+        if low_vendor == vendor.lower():
+            return True
+    return False
+
+def find_closest_vendor(searched_vendor, vendors=get_vendors()):
+    """
+    Find the closest matching vendor name from the list of vendors using Levenshtein distance.
+    :param searched_vendor: vendor name
+    :param vendors: list of vendors
     :return: closest matching vendor name
     """
     best_match = None
     highest_score = 0
 
+    low_vendor = searched_vendor.lower()
     # Use the first word of the input vendor name for matching
-    pt1 = vendor_name.lower().split()[0]
+    pt1_vendor = low_vendor.split()[0]
 
     for vendor in vendors:
-        score = 1 - (levenshtein_distance(pt1, vendor) / max(len(pt1), len(vendor)))
+        if low_vendor == vendor.lower():
+            return vendor
+        score = 1 - (levenshtein_distance(pt1_vendor, vendor.lower()) / max(len(pt1_vendor), len(vendor)))
         if score > highest_score:
             highest_score = score
             best_match = vendor
@@ -66,6 +88,7 @@ if __name__ == "__main__":
     print(vulnerabilities)
     print("\n")
 
-    test_vendors = ["Home Assistant", "IKEA of Sweden", "Google Inc.", "Apple", "Freebox", "Risco", "Ezviz", "Tuya", "IKEA of Sweden"]
+    test_vendors = ["Home Assistant", "IKEA of Sweden", "Google Inc.", "Apple", "Freebox", "Risco", "Ezviz", "Tuya"]
     for vendor in test_vendors:
-        print(f"test_vendor: {vendor}, found_vendor: {find_closest_vendor(vendor, vendors)} ")
+        print(f"vendor: {vendor} exists in CIRCL's API : {vendor_exists(vendor)}")
+        print(f"vendor: {vendor}, found_vendor: {find_closest_vendor(vendor, vendors)} ")
