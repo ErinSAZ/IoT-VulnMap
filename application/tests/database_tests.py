@@ -1,6 +1,6 @@
 import unittest
 import mysql.connector
-from application.app.database import *
+from database import *
 
 
 class TestDatabase(unittest.TestCase):

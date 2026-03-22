@@ -3,9 +3,11 @@
 
 import json
 import os
+
 import websocket
-from database import *
 from dotenv import load_dotenv
+
+from database import *
 
 # Configurations
 load_dotenv()

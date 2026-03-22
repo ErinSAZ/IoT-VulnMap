@@ -32,6 +32,16 @@ def vendor_exists(name_vendor_ha):
     return existing_vendor
 
 
+def get_vendors_without_vl():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT id, name_ha FROM Vendor WHERE name_vl IS NULL")
+    vendors_without_vl = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return vendors_without_vl
+
+
 def add_device(name, model, firmware, vendor_id):
     connection = get_connection()
     cursor = connection.cursor()
@@ -75,6 +85,14 @@ def add_exposes(device_id, vulnerability_id, date):
     cursor = connection.cursor()
     cursor.execute("INSERT INTO Exposes (device_id,vulnerability_id,detected_date) values (%s,%s,%s)",
                    (device_id, vulnerability_id, date))
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+def update_vl_vendor(vendor_id, vl_vendor):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("UPDATE Vendor SET name_vl = %s WHERE id = %s", (vl_vendor, vendor_id))
     connection.commit()
     cursor.close()
     connection.close()

@@ -5,7 +5,7 @@ from rapidfuzz.distance.metrics_cpp import levenshtein_distance
 
 # CONSTANTS
 
-FUZZY_THRESHOLD = 0.89
+FUZZY_THRESHOLD = 0.8
 VL_INSTANCE_URL = "https://vulnerability.circl.lu/"
 
 
