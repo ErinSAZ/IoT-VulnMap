@@ -1,6 +1,13 @@
 import json
+
 import requests
 from rapidfuzz.distance.metrics_cpp import levenshtein_distance
+
+# CONSTANTS
+
+FUZZY_THRESHOLD = 0.89
+VL_INSTANCE_URL = "https://vulnerability.circl.lu/"
+
 
 # API requests
 
@@ -9,8 +16,12 @@ def get_vendors():
     Fetch the list of vendors from CIRCL's API.
     :return: list of vendors
     """
-    content = requests.get("https://vulnerability.circl.lu/api/browse")
-    return json.loads(content.text)
+    try:
+        content = requests.get(f"{VL_INSTANCE_URL}/api/browse")
+        return json.loads(content.text)
+    except requests.exceptions.RequestException:
+        return []
+
 
 def get_products(vendor):
     """
@@ -18,8 +29,12 @@ def get_products(vendor):
     :param vendor: vendor name
     :return: list of products
     """
-    content = requests.get(f"https://vulnerability.circl.lu/api/browse/{vendor}")
-    return json.loads(content.text)
+    try:
+        content = requests.get(f"{VL_INSTANCE_URL}/api/browse/{vendor}")
+        return json.loads(content.text)
+    except requests.exceptions.RequestException:
+        return []
+
 
 def get_vulnerabilities(vendor, product):
     """
@@ -28,8 +43,11 @@ def get_vulnerabilities(vendor, product):
     :param product: product name
     :return: list of vulnerabilities
     """
-    content = requests.get(f"https://vulnerability.circl.lu/api/search/{vendor}/{product}")
-    return json.loads(content.text)
+    try:
+        content = requests.get(f"{VL_INSTANCE_URL}/api/search/{vendor}/{product}")
+        return json.loads(content.text)
+    except requests.exceptions.RequestException:
+        return []
 
 
 # Custom functions
@@ -50,6 +68,7 @@ def vendor_exists(searched_vendor, vendors=None):
         if low_vendor == vendor.lower():
             return True
     return False
+
 
 def find_closest_vendor(searched_vendor, vendors=None):
     """
@@ -75,11 +94,11 @@ def find_closest_vendor(searched_vendor, vendors=None):
         if score > highest_score:
             highest_score = score
             best_match = vendor
-    return best_match
+    return best_match if highest_score > FUZZY_THRESHOLD else None
 
 
 if __name__ == "__main__":
-    #Tests
+    # Tests
     vendors = get_vendors()
     print(vendors[0:5])
     print("\n")
@@ -94,7 +113,8 @@ if __name__ == "__main__":
     print(vulnerabilities)
     print("\n")
 
-    test_vendors = ["Home Assistant", "IKEA of Sweden", "Google Inc.", "Apple", "Freebox", "Risco", "Ezviz", "Tuya"]
+    test_vendors = ["Home Assistant", "IKEA of Sweden", "Google Inc.", "Apple", "Freebox", "Risco", "Ezviz", "Tuya",
+                    "RandomBrand123"]
     for vendor in test_vendors:
         print(f"vendor: {vendor} exists in CIRCL's API : {vendor_exists(vendor)}")
         print(f"vendor: {vendor}, found_vendor: {find_closest_vendor(vendor, vendors)} ")
