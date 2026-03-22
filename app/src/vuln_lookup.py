@@ -1,3 +1,7 @@
+"""
+This module contains functions for finding vulnerabilities in CIRCL's API.
+"""
+
 import json
 
 import requests
@@ -59,6 +63,9 @@ def vendor_exists(searched_vendor, vendors=None):
     :param vendors: list of vendors
     :return: True if the vendor exists, False otherwise
     """
+    if searched_vendor is None:
+        return False
+
     if vendors is None:
         vendors = get_vendors()
 
@@ -77,6 +84,9 @@ def find_closest_vendor(searched_vendor, vendors=None):
     :param vendors: list of vendors
     :return: closest matching vendor name
     """
+    if searched_vendor is None:
+        return searched_vendor
+
     if vendors is None:
         vendors = get_vendors()
 
