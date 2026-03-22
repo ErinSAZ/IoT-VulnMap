@@ -65,6 +65,16 @@ def device_exists(name, model):
     connection.close()
     return device_exists
 
+def get_all_devices():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM Device JOIN Vendor ON Device.vendor_id = Vendor.id")
+    all_devices = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return all_devices
+
+
 # Remove the device with the given id in the database
 def remove_device(id):
     connection = get_connection()
