@@ -13,6 +13,7 @@ HA_HOST = os.getenv("HA_HOST")
 HA_URL = "ws://" + HA_HOST + "/api/websocket"
 HA_TOKEN = os.getenv("HA_TOKEN")
 
+
 def get_devices():
     ws = websocket.create_connection(HA_URL)
 
@@ -40,7 +41,7 @@ def get_devices():
     devices = response.get('result', [])
     ws.close()
 
-    for device in devices :
+    for device in devices:
         entry = {
             "manufacturer": device.get('manufacturer') or "N/A",
             "model": device.get('model') or "N/A",
@@ -56,9 +57,9 @@ def get_devices():
             vendor_id = existing_vendor[0]
 
         # Insert device data into DEVICE database
-        existing_device = device_exists(entry['name'],entry['model'])
+        existing_device = device_exists(entry['name'], entry['model'])
 
         if existing_device is None:
-            add_device(entry['name'],entry['model'],entry['sw_version'],vendor_id)
+            add_device(entry['name'], entry['model'], entry['sw_version'], vendor_id)
 
     return None
