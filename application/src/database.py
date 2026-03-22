@@ -1,6 +1,10 @@
 import mysql.connector
 
+# ============================================
+# Database access functions
+# ============================================
 
+# Established and return a connexion to the database
 def get_connection():
     return mysql.connector.connect(
         host="localhost",
@@ -10,7 +14,7 @@ def get_connection():
         database="IoT_VulnMap"
     )
 
-
+# Add a new vendor to the database and return its ID
 def add_vendor(name_vendor_ha):
     connection = get_connection()
     cursor = connection.cursor()
@@ -21,7 +25,7 @@ def add_vendor(name_vendor_ha):
     connection.close()
     return vendor_id
 
-
+# Check if a vendor with the given name_ha exists in the database and return its ID if found
 def vendor_exists(name_vendor_ha):
     connection = get_connection()
     cursor = connection.cursor()
@@ -31,7 +35,7 @@ def vendor_exists(name_vendor_ha):
     connection.close()
     return existing_vendor
 
-
+# Return all the vendors who don't have a name_vl in the database
 def get_vendors_without_vl():
     connection = get_connection()
     cursor = connection.cursor()
@@ -41,7 +45,7 @@ def get_vendors_without_vl():
     connection.close()
     return vendors_without_vl
 
-
+# Add a new device to the database
 def add_device(name, model, firmware, vendor_id):
     connection = get_connection()
     cursor = connection.cursor()
@@ -51,7 +55,7 @@ def add_device(name, model, firmware, vendor_id):
     cursor.close()
     connection.close()
 
-
+# Check if a device with the given name and model exists in the database and return its ID if found
 def device_exists(name, model):
     connection = get_connection()
     cursor = connection.cursor()
@@ -61,14 +65,14 @@ def device_exists(name, model):
     connection.close()
     return device_exists
 
-
+# Remove the device with the given id in the database
 def remove_device(id):
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute("DELETE FROM Device WHERE id = %s", (id,))
     connection.commit()
 
-
+# Add a new vulnerability to the database
 def add_vulnerability(cve, cvss, descr, severity, date):
     connection = get_connection()
     cursor = connection.cursor()
@@ -79,7 +83,7 @@ def add_vulnerability(cve, cvss, descr, severity, date):
     cursor.close()
     connection.close()
 
-
+# Add a new exposes relation between a device and a vulnerability in the database
 def add_exposes(device_id, vulnerability_id, date):
     connection = get_connection()
     cursor = connection.cursor()
@@ -89,6 +93,7 @@ def add_exposes(device_id, vulnerability_id, date):
     cursor.close()
     connection.close()
 
+# Update the vulnerability lookup name of a vendor
 def update_vl_vendor(vendor_id, vl_vendor):
     connection = get_connection()
     cursor = connection.cursor()
