@@ -1,6 +1,3 @@
-## COMMENTAIRES A FAIRE EN ANGLAIS pour description generale
-## Boucle recherche appareils
-
 import json
 import os
 
@@ -9,17 +6,17 @@ from dotenv import load_dotenv
 
 from database import *
 
-# Configurations
+# Home Assistant credentials
 load_dotenv()
 HA_HOST = os.getenv("HA_HOST")
 HA_URL = "ws://" + HA_HOST + "/api/websocket"
 HA_TOKEN = os.getenv("HA_TOKEN")
 
-
+# Get devices from Home Assistant and insert them into the database
 def get_devices():
     ws = websocket.create_connection(HA_URL)
 
-    # Authentification
+    # Authenticate with Home Assistant
     auth_msg = json.loads(ws.recv())
     if auth_msg['type'] == 'auth_required':
         ws.send(json.dumps({
@@ -43,6 +40,7 @@ def get_devices():
     devices = response.get('result', [])
     ws.close()
 
+    # Get datas for each device
     for device in devices:
         entry = {
             "manufacturer": device.get('manufacturer') or "N/A",
@@ -51,14 +49,14 @@ def get_devices():
             "name": device.get('name_by_user') or device.get('name') or "N/A",
         }
 
-        # Insert vendor data into VENDOR database
+        # Insert vendor datas into VENDOR database
         existing_vendor = vendor_exists(entry['manufacturer'])
         if existing_vendor is None:
             vendor_id = add_vendor(entry['manufacturer'])
         else:
             vendor_id = existing_vendor[0]
 
-        # Insert device data into DEVICE database
+        # Insert device datas into DEVICE database
         existing_device = device_exists(entry['name'], entry['model'])
 
         if existing_device is None:
