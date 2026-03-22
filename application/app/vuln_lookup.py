@@ -34,13 +34,16 @@ def get_vulnerabilities(vendor, product):
 
 # Custom functions
 
-def vendor_exists(searched_vendor, vendors=get_vendors()):
+def vendor_exists(searched_vendor, vendors=None):
     """
     Check if a given vendor exists in CIRCL's API.
     :param searched_vendor: vendor name
     :param vendors: list of vendors
     :return: True if the vendor exists, False otherwise
     """
+    if vendors is None:
+        vendors = get_vendors()
+
     low_vendor = searched_vendor.lower()
 
     for vendor in vendors:
@@ -48,13 +51,16 @@ def vendor_exists(searched_vendor, vendors=get_vendors()):
             return True
     return False
 
-def find_closest_vendor(searched_vendor, vendors=get_vendors()):
+def find_closest_vendor(searched_vendor, vendors=None):
     """
     Find the closest matching vendor name from the list of vendors using Levenshtein distance.
     :param searched_vendor: vendor name
     :param vendors: list of vendors
     :return: closest matching vendor name
     """
+    if vendors is None:
+        vendors = get_vendors()
+
     best_match = None
     highest_score = 0
 

@@ -4,7 +4,7 @@
 import json
 import os
 import websocket
-from application.app.database import *
+from database import *
 from dotenv import load_dotenv
 
 # Configurations
@@ -49,10 +49,11 @@ def get_devices():
         }
 
         # Insert vendor data into VENDOR database
-        if vendor_exists(entry['manufacturer']) is None:
+        existing_vendor = vendor_exists(entry['manufacturer'])
+        if existing_vendor is None:
             vendor_id = add_vendor(entry['manufacturer'])
         else:
-            vendor_id = vendor_exists(entry['manufacturer'])[0]
+            vendor_id = existing_vendor[0]
 
         # Insert device data into DEVICE database
         existing_device = device_exists(entry['name'],entry['model'])
