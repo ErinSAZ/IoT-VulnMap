@@ -1,4 +1,4 @@
-from find_devices import get_devices
+from app.src.find_devices import *
 
 
 def main():

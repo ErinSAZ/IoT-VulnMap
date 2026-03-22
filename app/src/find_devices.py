@@ -43,10 +43,10 @@ def get_devices():
     # Get datas for each device
     for device in devices:
         entry = {
-            "manufacturer": device.get('manufacturer') or "N/A",
-            "model": device.get('model') or "N/A",
-            "sw_version": device.get('sw_version') or "N/A",
-            "name": device.get('name_by_user') or device.get('name') or "N/A",
+            "manufacturer": device.get('manufacturer') or None,
+            "model": device.get('model') or None,
+            "sw_version": device.get('sw_version') or None,
+            "name": device.get('name_by_user') or device.get('name') or None,
         }
 
         # Insert vendor datas into VENDOR database

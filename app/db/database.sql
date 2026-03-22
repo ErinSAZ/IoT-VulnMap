@@ -51,9 +51,8 @@ BEGIN
     FROM Vendor
     WHERE id = NEW.vendor_id;
 
-    # Check if model, firmware version, and vendor are 'N/A'
-    IF NEW.model IS NULL OR NEW.model = 'N/A' OR NEW.firmware_version IS NULL
-           OR NEW.firmware_version = 'N/A' OR vendor IS NULL OR vendor = 'N/A' THEN
+    # Check if model, firmware version, and vendor are None
+    IF NEW.model IS NULL OR NEW.firmware_version IS NULL OR vendor IS NULL THEN
         SET NEW.is_auditable = FALSE;
     ELSE
         SET NEW.is_auditable = TRUE;
