@@ -33,10 +33,10 @@ def update_auditable_status():
     """
     devices_list = get_all_devices()
 
-    for device in devices_list:
-        if (device[7] is not None  # vendor vl_name
-                and device[2] is not None  # device model
-                and device[3] is not None):  # device firmware
-            database.update_auditable_status(device[0], True)
+    for device_id, model, firmware, name_vl in devices_list:
+        if (name_vl is not None  # vendor vl_name
+                and model is not None  # device model
+                and firmware is not None):  # device firmware
+            database.update_auditable_status(device_id, True)
         else:
-            database.update_auditable_status(device[0], False)
+            database.update_auditable_status(device_id, False)

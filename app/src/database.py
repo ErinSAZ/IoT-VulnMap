@@ -75,7 +75,7 @@ def device_exists(name, model):
 def get_all_devices():
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM Device JOIN Vendor ON Device.vendor_id = Vendor.id")
+    cursor.execute("SELECT Device.id, Device.model, Device.firmware_version, Vendor.name_vl FROM Device JOIN Vendor ON Device.vendor_id = Vendor.id")
     all_devices = cursor.fetchall()
     cursor.close()
     connection.close()
