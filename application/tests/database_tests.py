@@ -10,7 +10,7 @@ class TestDatabase(unittest.TestCase):
     # =============================================
 
     def setUp(self):
-        """Nettoie la base avant chaque test"""
+        # Cleanup database before test
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM Exposes")
@@ -36,7 +36,7 @@ class TestDatabase(unittest.TestCase):
         self.assertIsNotNone(result)
 
     def test_vendor_exists_introuvable(self):
-        result = vendor_exists("vendeur_inexistant")
+        result = vendor_exists("nonexistent_vendor")
         self.assertIsNone(result)
 
     def test_vendor_exists_na(self):
@@ -49,7 +49,7 @@ class TestDatabase(unittest.TestCase):
     # =============================================
 
     def _get_device_auditable(self, name, model):
-        """Helper : récupère is_auditable d'un device"""
+        """Helper : get is_auditable from a device"""
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -62,51 +62,51 @@ class TestDatabase(unittest.TestCase):
         return result[0] if result else None
 
     def test_add_device_tout_valide_est_auditable(self):
-        """Tout renseigné → is_auditable doit être TRUE"""
+        """All information → is_auditable must be TRUE"""
         vendor_id = add_vendor("cisco")
-        add_device("Routeur", "RV340", "1.0.3", vendor_id)
-        self.assertEqual(self._get_device_auditable("Routeur", "RV340"), 1)
+        add_device("Router", "RV340", "1.0.3", vendor_id)
+        self.assertEqual(self._get_device_auditable("Router", "RV340"), 1)
 
     def test_add_device_modele_na_non_auditable(self):
-        """Modèle N/A → is_auditable doit être FALSE"""
+        """Model N/A → is_auditable must be FALSE"""
         vendor_id = add_vendor("cisco")
-        add_device("Routeur", "N/A", "1.0.3", vendor_id)
-        self.assertEqual(self._get_device_auditable("Routeur", "N/A"), 0)
+        add_device("Router", "N/A", "1.0.3", vendor_id)
+        self.assertEqual(self._get_device_auditable("Router", "N/A"), 0)
 
     def test_add_device_firmware_na_non_auditable(self):
-        """Firmware N/A → is_auditable doit être FALSE"""
+        """Firmware N/A → is_auditable must be FALSE"""
         vendor_id = add_vendor("cisco")
-        add_device("Routeur", "RV340", "N/A", vendor_id)
-        self.assertEqual(self._get_device_auditable("Routeur", "RV340"), 0)
+        add_device("Router", "RV340", "N/A", vendor_id)
+        self.assertEqual(self._get_device_auditable("Router", "RV340"), 0)
 
     def test_add_device_vendor_na_non_auditable(self):
-        """Vendor N/A → is_auditable doit être FALSE"""
+        """Vendor N/A → is_auditable must be FALSE"""
         vendor_id = add_vendor("N/A")
-        add_device("Routeur", "RV340", "1.0.3", vendor_id)
-        self.assertEqual(self._get_device_auditable("Routeur", "RV340"), 0)
+        add_device("Router", "RV340", "1.0.3", vendor_id)
+        self.assertEqual(self._get_device_auditable("Router", "RV340"), 0)
 
     def test_add_device_firmware_null_non_auditable(self):
-        """Firmware NULL → is_auditable doit être FALSE"""
+        """Firmware NULL → is_auditable must be FALSE"""
         vendor_id = add_vendor("cisco")
-        add_device("Routeur", "RV340", None, vendor_id)
-        self.assertEqual(self._get_device_auditable("Routeur", "RV340"), 0)
+        add_device("Router", "RV340", None, vendor_id)
+        self.assertEqual(self._get_device_auditable("Router", "RV340"), 0)
 
     def test_device_exists_trouve(self):
         vendor_id = add_vendor("cisco")
-        add_device("Routeur", "RV340", "1.0.3", vendor_id)
-        result = device_exists("Routeur", "RV340")
+        add_device("Router", "RV340", "1.0.3", vendor_id)
+        result = device_exists("Router", "RV340")
         self.assertIsNotNone(result)
 
     def test_device_exists_introuvable(self):
-        result = device_exists("Appareil inexistant", "Modele inexistant")
+        result = device_exists("Nonexistent device", "Nonexistent model")
         self.assertIsNone(result)
 
     def test_remove_device(self):
         vendor_id = add_vendor("cisco")
-        add_device("Routeur", "RV340", "1.0.3", vendor_id)
-        device_id = device_exists("Routeur", "RV340")[0]
+        add_device("Router", "RV340", "1.0.3", vendor_id)
+        device_id = device_exists("Router", "RV340")[0]
         remove_device(device_id)
-        self.assertIsNone(device_exists("Routeur", "RV340"))
+        self.assertIsNone(device_exists("Router", "RV340"))
 
     # =============================================
     # TESTS VULNERABILITY
@@ -128,8 +128,8 @@ class TestDatabase(unittest.TestCase):
 
     def test_add_exposes(self):
         vendor_id = add_vendor("cisco")
-        add_device("Routeur", "RV340", "1.0.3", vendor_id)
-        device_id = device_exists("Routeur", "RV340")[0]
+        add_device("Router", "RV340", "1.0.3", vendor_id)
+        device_id = device_exists("Router", "RV340")[0]
 
         add_vulnerability("CVE-2024-5678", 7.5, "SQL Injection", "HIGH", "2024-03-01")
         conn = get_connection()
@@ -153,10 +153,10 @@ class TestDatabase(unittest.TestCase):
         self.assertIsNotNone(result)
 
     def test_add_exposes_doublon_interdit(self):
-        """La clé primaire composite doit rejeter les doublons"""
+        """The composite primary key must reject duplicates"""
         vendor_id = add_vendor("cisco")
-        add_device("Routeur", "RV340", "1.0.3", vendor_id)
-        device_id = device_exists("Routeur", "RV340")[0]
+        add_device("Router", "RV340", "1.0.3", vendor_id)
+        device_id = device_exists("Router", "RV340")[0]
 
         add_vulnerability("CVE-2024-9999", 5.0, "XSS", "MEDIUM", "2024-05-01")
         conn = get_connection()
