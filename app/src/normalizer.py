@@ -3,6 +3,7 @@ TODO
 """
 import vuln_lookup
 import database
+from database import get_all_devices
 
 
 def normalize_vendor():
@@ -27,4 +28,13 @@ def normalize_vendor():
 
 def update_auditable_status():
     # TODO
+    devices_list = get_all_devices()
+
+    for device in devices_list:
+        vendor_id = device[5]
+
     pass
+
+if __name__ == "__main__":
+    devices_list = get_all_devices()
+    print(devices_list)
