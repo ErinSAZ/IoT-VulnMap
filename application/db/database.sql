@@ -20,7 +20,6 @@ CREATE TABLE Device (
     name VARCHAR(64),
     model VARCHAR(64),
     firmware_version VARCHAR(64),
-    os_version VARCHAR(64),
     vendor_id INTEGER,
     FOREIGN KEY (vendor_id) REFERENCES Vendor(id)
 );

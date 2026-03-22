@@ -28,10 +28,10 @@ def vendor_exists(name_vendor_ha):
     connection.close()
     return existing_vendor
 
-def add_device(name,model,os,vendor_id):
+def add_device(name,model,firmware,vendor_id):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO Device (name,model,os_version,vendor_id) values (%s,%s,%s,%s)", (name,model,os,vendor_id))
+    cursor.execute("INSERT INTO Device (name,model,firmware_version,vendor_id) values (%s,%s,%s,%s)", (name,model,firmware,vendor_id))
     connection.commit()
     cursor.close()
     connection.close()
