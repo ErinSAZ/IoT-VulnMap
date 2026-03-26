@@ -90,13 +90,27 @@ def remove_device(id):
     connection.commit()
 
 
-# Add a new vulnerability to the database
-def add_vulnerability(cve, cvss, descr, severity, date):
+# Add a new vulnerability to the database and link it with devices
+def add_vulnerability(cve, cvss, descr, severity, date,device_id):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute(
+
+    #Verify if vulnerability already exists
+    cursor.execute("SELECT id FROM Vulnerability WHERE cve_id = %s", (cve,))
+    existing_vulnerability = cursor.fetchone()
+
+    if existing_vulnerability is None:
+        cursor.execute(
         "INSERT INTO Vulnerability (cve_id,cvss_score,description,severity,published_date) values (%s,%s,%s,%s,%s)",
         (cve, cvss, descr, severity, date))
+        vulnerability_id = cursor.lastrowid
+    else:
+        vulnerability_id = existing_vulnerability[0]
+
+    #Link vulnerability to device if not already linked
+    cursor.execute("INSERT INTO Exposes (device_id,vulnerability_id,detected_date) values (%s,%s,%s)",
+                   (device_id,vulnerability_id,date))
+
     connection.commit()
     cursor.close()
     connection.close()
@@ -122,7 +136,7 @@ def update_vl_vendor(vendor_id, vl_vendor):
     cursor.close()
     connection.close()
 
-
+# Update the auditable status of a device
 def update_auditable_status(device_id, is_auditable):
     connection = get_connection()
     cursor = connection.cursor()
@@ -130,3 +144,15 @@ def update_auditable_status(device_id, is_auditable):
     connection.commit()
     cursor.close()
     connection.close()
+
+# Get all auditable devices with their model, firmware version and vulnerability lookup vendor name
+def get_auditable_devices():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT Device.id, Device.model, Device.firmware_version, Vendor.name_vl"
+                   "FROM Device JOIN Vendor ON Device.vendor_id = Vendor.id "
+                   "WHERE Device.is_auditable = TRUE")
+    auditable_devices = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return auditable_devices
