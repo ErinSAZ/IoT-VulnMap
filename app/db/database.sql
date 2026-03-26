@@ -37,25 +37,3 @@ CREATE TABLE Exposes
     FOREIGN KEY (device_id) REFERENCES Device (id),
     FOREIGN KEY (vulnerability_id) REFERENCES Vulnerability (id)
 );
-
-CREATE TRIGGER update_audit_device_status
-    BEFORE INSERT
-    ON Device
-    FOR EACH ROW
-BEGIN
-    DECLARE vendor VARCHAR(64);
-
-    # Search vendor id
-    SELECT name_ha
-    INTO vendor
-    FROM Vendor
-    WHERE id = NEW.vendor_id;
-
-    # Check if model, firmware version, and vendor are None
-    IF NEW.model IS NULL OR NEW.firmware_version IS NULL OR vendor IS NULL THEN
-        SET NEW.is_auditable = FALSE;
-    ELSE
-        SET NEW.is_auditable = TRUE;
-    END IF;
-END;
-
