@@ -1,4 +1,6 @@
+from app.src import normalizer
 from app.src.find_devices import *
+from app.src.normalizer import normalize_vendor
 
 
 def main():
@@ -7,6 +9,8 @@ def main():
     # Step 1: Discover and sync devices from Home Assistant
     print("\n[1/2] Scanning devices...")
     get_devices()
+    normalize_vendor()
+    normalizer.update_auditable_status()
     print("Devices synced to database.")
 
     # Step 2: Search for vulnerabilities for each device
