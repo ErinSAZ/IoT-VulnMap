@@ -1,5 +1,4 @@
-import mysql.connector
-
+import pymysql
 
 # ============================================
 # Database access functions
@@ -7,7 +6,7 @@ import mysql.connector
 
 # Established and return a connexion to the database
 def get_connection():
-    return mysql.connector.connect(
+    return pymysql.connections.Connection(
         host="localhost",
         port=3307,
         user="user",
