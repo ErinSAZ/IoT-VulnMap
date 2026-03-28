@@ -88,12 +88,23 @@ def is_firmware_affected(firmware_version: str, configurations: list) -> bool:
     """
     affected_versions, has_wildcard = extract_affected_versions_from_configurations(configurations)
 
-    if has_wildcard:
-        return True
-
     try:
         fw = Version(firmware_version)
-        return any(fw == Version(v) for v in affected_versions)
-    except Exception as e :
-        return False
+        for v in affected_versions:
+            status = v.get('status')
+            if status != 'affected':
+                continue
 
+            less_than = v.get('lessThan')
+            less_than_or_equal = v.get('lessThanOrEqual')
+            exact = v.get('version')
+
+            if less_than and fw < Version(less_than):
+                return True
+            if less_than_or_equal and fw <= Version(less_than_or_equal):
+                return True
+            if exact and exact != '0' and fw == Version(exact):
+                return True
+
+    except Exception as e:
+        return False

@@ -1,0 +1,22 @@
+{
+  "vulnerable_devices": [
+    {
+      "vendor_vl": "apple",
+      "model": "iOS and iPadOS",
+      "firmware_version": "26.3"
+    },
+    {
+      "vendor_vl": "google",
+      "model": "google nest mini",
+      "firmware_version": "1.56.356012"
+    },
+    {
+      "vendor_vl": "netgear",
+      "model": "r7000_firmware",
+      "firmware_version": "1.0.11.116"
+    },
+    {
+      "vendor_vl": "dlink",
+      "model": "dir-605l_firmware",
+      "firmware_version": "1.13"
+}
