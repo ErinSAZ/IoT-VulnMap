@@ -1,6 +1,6 @@
 from app.src import normalizer
 from app.src.find_devices import *
-from app.src.normalizer import normalize_vendor
+from app.src.normalizer import *
 
 
 def main():
@@ -8,8 +8,11 @@ def main():
 
     # Step 1: Discover and sync devices from Home Assistant
     print("\n[1/2] Scanning devices...")
+
+    load_mapping()
     get_devices()
     normalize_vendor()
+    normalize_product()
     normalizer.update_auditable_status()
     print("Devices synced to database.")
 

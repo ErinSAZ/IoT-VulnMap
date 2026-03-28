@@ -85,7 +85,7 @@ def find_closest_vendor(searched_vendor, vendors=None):
     :return: closest matching vendor name
     """
     if searched_vendor is None:
-        return searched_vendor
+        return None
 
     if vendors is None:
         vendors = get_vendors()
@@ -104,6 +104,57 @@ def find_closest_vendor(searched_vendor, vendors=None):
         if score > highest_score:
             highest_score = score
             best_match = vendor
+    return best_match if highest_score > FUZZY_THRESHOLD else None
+
+
+def product_exists(searched_product, vendor):
+    """
+    Check if a given product exists in CIRCL's API.
+    :param searched_product: product name
+    :param vendor: vulnerability_lookup's vendor name
+    :return: True if the product exists, False otherwise
+    """
+    if searched_product is None:
+        return False
+
+    if vendor is None:
+        return False
+
+    low_product = searched_product.lower()
+
+    products = get_products(vendor)
+    for product in products:
+        if low_product == product.lower():
+            return True
+    return False
+
+
+def find_closest_product(searched_product, vendor):
+    """
+    Find the closest matching product name from the list of products of a given vendor using Levenshtein distance.
+    :param searched_product: product name
+    :param vendor: vulnerability_lookup's vendor name
+    :return: closest matching product name
+    """
+    if searched_product is None:
+        return None
+
+    if vendor is None:
+        return None
+
+    best_match = None
+    highest_score = 0
+
+    low_product = searched_product.lower()
+
+    products = get_products(vendor)
+    for product in products:
+        if low_product == product.lower():
+            return product
+        score = 1 - (levenshtein_distance(low_product, product.lower()) / max(len(low_product), len(product)))
+        if score > highest_score:
+            highest_score = score
+            best_match = product
     return best_match if highest_score > FUZZY_THRESHOLD else None
 
 

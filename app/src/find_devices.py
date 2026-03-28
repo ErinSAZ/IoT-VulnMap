@@ -12,6 +12,7 @@ HA_HOST = os.getenv("HA_HOST")
 HA_URL = "ws://" + HA_HOST + "/api/websocket"
 HA_TOKEN = os.getenv("HA_TOKEN")
 
+
 # Get devices from Home Assistant and insert them into the database
 def get_devices():
     ws = websocket.create_connection(HA_URL)
@@ -49,17 +50,30 @@ def get_devices():
             "name": device.get('name_by_user') or device.get('name') or None,
         }
 
-        # Insert vendor datas into VENDOR database
-        existing_vendor = vendor_exists(entry['manufacturer'])
-        if existing_vendor is None:
-            vendor_id = add_vendor(entry['manufacturer'])
-        else:
-            vendor_id = existing_vendor[0]
+        # Test if the device has a manufacturer
+        vendor_id = None
+        if entry['manufacturer'] is not None:
+
+            # Insert vendor datas into VENDOR database
+            existing_vendor = vendor_exists(entry['manufacturer'])
+            if existing_vendor is None:
+                vendor_id = add_vendor(entry['manufacturer'])
+            else:
+                vendor_id = existing_vendor[0]
+
+        # Test if the device has a model
+        model_id = None
+        if entry['model'] is not None:
+            existing_model = model_exists(entry['model'])
+            if existing_model is None:
+                model_id = add_model(entry['model'], vendor_id)
+            else:
+                model_id = existing_model
 
         # Insert device datas into DEVICE database
         existing_device = device_exists(entry['name'], entry['model'])
 
         if existing_device is None:
-            add_device(entry['name'], entry['model'], entry['sw_version'], vendor_id)
+            add_device(entry['name'], vendor_id, model_id, entry['sw_version'])
 
     return None

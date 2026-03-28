@@ -1,10 +1,10 @@
+import requests
 from distutils.version import Version
 
-import requests
-from datetime import date
 from app.src.database import *
 
 CIRCL_API_URL = "https://vulnerability.circl.lu/search"
+
 
 def search_vulnerabilities(vendor, product):
     """
@@ -33,14 +33,14 @@ def find_all_vulnerabilities():
         vulnerabilities = search_vulnerabilities(name_vl, model)
         for vulnerability in vulnerabilities:
             # Getting firmware informations
-            nvd_data = vulnerability.get('fkie_nvd',{})
+            nvd_data = vulnerability.get('fkie_nvd', {})
             configurations = nvd_data.get('configurations', [])
 
-            #Check if firmware is affected
+            # Check if firmware is affected
             if configurations and not is_firmware_affected(firmware_version, configurations):
                 continue
 
-            #Exclu CVE published before the device firmware release date
+            # Exclu CVE published before the device firmware release date
             cve_date = nvd_data.get('published')
             if cve_date and cve_date < firmware_date:
                 continue
@@ -53,6 +53,7 @@ def find_all_vulnerabilities():
                 date=cve_date,
                 device_id=device_id
             )
+
 
 def extract_affected_versions_from_configurations(configurations: list) -> tuple[list, bool]:
     """
