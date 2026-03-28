@@ -34,6 +34,7 @@ def update_auditable_status():
     devices_list = get_all_devices()
 
     for device_id, model, firmware, name_vl in devices_list:
+
         if (name_vl is not None  # vendor vl_name
                 and model is not None  # device model
                 and firmware is not None):  # device firmware

@@ -155,3 +155,4 @@ def get_auditable_devices():
     cursor.close()
     connection.close()
     return auditable_devices
+
