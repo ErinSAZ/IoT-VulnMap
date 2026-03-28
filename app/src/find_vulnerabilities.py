@@ -5,10 +5,12 @@ for all auditable devices stored in the database and persists the results.
 
 from distutils.version import Version
 
+import requests
+
 from app.src.database import *
-from vuln_lookup import get_vulnerabilities
+from vuln_lookup import get_vulnerabilities, VL_INSTANCE_URL
 
-
+#TODO a refaire de 0 car complexe
 def find_all_vulnerabilities():
     """
     Find all vulnerabilities for all auditable devices in the database and store them.
@@ -16,10 +18,12 @@ def find_all_vulnerabilities():
     devices_list = get_auditable_devices()
 
     for device_id, product, firmware, name_vl in devices_list:
-        firmware_version, firmware_date = firmware
+        firmware_version = firmware
+        firmware_date = None
 
         vulnerabilities = get_vulnerabilities(name_vl, product)
-        for vulnerability in vulnerabilities:
+        vuln_list = vulnerabilities['results']['nvd']
+        for vulnerability in vuln_list:
             # Extract firmware information
             nvd_data = vulnerability.get('fkie_nvd', {})
             configurations = nvd_data.get('configurations', [])
@@ -30,7 +34,7 @@ def find_all_vulnerabilities():
 
             # Skip CVEs published before the device firmware release date
             cve_date = nvd_data.get('published')
-            if cve_date and cve_date < firmware_date:
+            if cve_date and firmware_date and cve_date < firmware_date:
                 continue
 
             add_vulnerability(
@@ -41,6 +45,7 @@ def find_all_vulnerabilities():
                 date=cve_date,
                 device_id=device_id
             )
+
 
 
 def extract_affected_versions_from_configurations(configurations: list) -> tuple[list, bool]:
