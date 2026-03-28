@@ -73,17 +73,17 @@ def load_mapping(path=MAPPINGS_PATH):
         mappings = json.load(f)
 
         for vendor in mappings["vendors"]:
-            # Add the vendor if it doesn't exist
-            vendor_id = database.vendor_exists(vendor["ha_name"])
-            if not vendor_id:
+            existing = database.vendor_exists(vendor["ha_name"])
+            if existing is None:
                 vendor_id = database.add_vendor(vendor["ha_name"])
-            # Update the vendor's VL name
+            else:
+                vendor_id = existing[0]
             database.update_vl_vendor(vendor_id, vendor["vl_name"])
 
             for product in vendor["products"]:
-                # Add the product if it doesn't exist
-                model_id = database.model_exists(product["ha_name"])
-                if not model_id:
+                existing_model = database.model_exists(product["ha_name"])
+                if existing_model is None:
                     model_id = database.add_model(product["ha_name"], vendor_id)
-                # Update the product's VL name
+                else:
+                    model_id = existing_model[0]
                 database.update_vl_model(model_id, product["vl_name"])
