@@ -15,13 +15,13 @@ class TestDatabase(unittest.TestCase):
         cursor.execute("DELETE FROM Exposes")
         cursor.execute("DELETE FROM Device")
         cursor.execute("DELETE FROM Vulnerability")
-        cursor.execute("DELETE FROM Models")
+        cursor.execute("DELETE FROM Products")
         cursor.execute("DELETE FROM Vendor")
         # Reset auto_increment counters
         cursor.execute("ALTER TABLE Exposes AUTO_INCREMENT = 1")
         cursor.execute("ALTER TABLE Device AUTO_INCREMENT = 1")
         cursor.execute("ALTER TABLE Vulnerability AUTO_INCREMENT = 1")
-        cursor.execute("ALTER TABLE Models AUTO_INCREMENT = 1")
+        cursor.execute("ALTER TABLE Products AUTO_INCREMENT = 1")
         cursor.execute("ALTER TABLE Vendor AUTO_INCREMENT = 1")
         conn.commit()
         cursor.close()
@@ -49,60 +49,60 @@ class TestDatabase(unittest.TestCase):
         self.assertGreater(len(vendors), 0)
         self.assertEqual(vendors[0][1], "cisco")
 
-    def test_add_model(self):
+    def test_add_product(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        self.assertIsNotNone(model_id)
-        self.assertIsInstance(model_id, int)
+        product_id = add_product("RV340", vendor_id)
+        self.assertIsNotNone(product_id)
+        self.assertIsInstance(product_id, int)
 
-    def test_model_exists(self):
+    def test_product_exists(self):
         vendor_id = add_vendor("cisco")
-        add_model("RV340", vendor_id)
-        result = model_exists("RV340")
+        add_product("RV340", vendor_id)
+        result = product_exists("RV340")
         self.assertIsNotNone(result)
 
-    def test_get_models_without_vl(self):
+    def test_get_products_without_vl(self):
         vendor_id = add_vendor("cisco")
-        add_model("RV340", vendor_id)
-        models = get_models_without_vl()
-        self.assertIsInstance(models, list)
-        self.assertGreater(len(models), 0)
-        self.assertEqual(models[0][1], "RV340")
+        add_product("RV340", vendor_id)
+        products = get_products_without_vl()
+        self.assertIsInstance(products, list)
+        self.assertGreater(len(products), 0)
+        self.assertEqual(products[0][1], "RV340")
 
     def test_add_device(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        add_device("Router", vendor_id, model_id, "1.0.3")
+        product_id = add_product("RV340", vendor_id)
+        add_device("Router", vendor_id, product_id, "1.0.3")
         device = device_exists("Router", "RV340")
         self.assertIsNotNone(device)
 
     def test_device_exists(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        add_device("Router", vendor_id, model_id, "1.0.3")
+        product_id = add_product("RV340", vendor_id)
+        add_device("Router", vendor_id, product_id, "1.0.3")
         result = device_exists("Router", "RV340")
         self.assertIsNotNone(result)
 
     def test_get_all_devices(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        add_device("Router", vendor_id, model_id, "1.0.3")
+        product_id = add_product("RV340", vendor_id)
+        add_device("Router", vendor_id, product_id, "1.0.3")
         devices = get_all_devices()
         self.assertIsInstance(devices, list)
         self.assertGreater(len(devices), 0)
 
     def test_remove_device(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        add_device("Router", vendor_id, model_id, "1.0.3")
+        product_id = add_product("RV340", vendor_id)
+        add_device("Router", vendor_id, product_id, "1.0.3")
         device_id = device_exists("Router", "RV340")[0]
         remove_device(device_id)
         self.assertIsNone(device_exists("Router", "RV340"))
 
     def test_add_vulnerability(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        add_device("Router", vendor_id, model_id, "1.0.3")
+        product_id = add_product("RV340", vendor_id)
+        add_device("Router", vendor_id, product_id, "1.0.3")
         device_id = device_exists("Router", "RV340")[0]
         add_vulnerability("CVE-2024-1234", 9.8, "Buffer overflow", "CRITICAL", "2024-01-15", device_id)
         # Check if vulnerability exists
@@ -116,8 +116,8 @@ class TestDatabase(unittest.TestCase):
 
     def test_add_exposes(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        add_device("Router", vendor_id, model_id, "1.0.3")
+        product_id = add_product("RV340", vendor_id)
+        add_device("Router", vendor_id, product_id, "1.0.3")
         device_id = device_exists("Router", "RV340")[0]
         conn = get_connection()
         cursor = conn.cursor()
@@ -154,14 +154,14 @@ class TestDatabase(unittest.TestCase):
         conn.close()
         self.assertEqual(result[0], "Cisco Systems")
 
-    def test_update_vl_model(self):
+    def test_update_vl_product(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        update_vl_model(model_id, "RV340W")
+        product_id = add_product("RV340", vendor_id)
+        update_vl_product(product_id, "RV340W")
         # Check update
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT name_vl FROM Models WHERE id = %s", (model_id,))
+        cursor.execute("SELECT name_vl FROM Products WHERE id = %s", (product_id,))
         result = cursor.fetchone()
         cursor.close()
         conn.close()
@@ -169,10 +169,10 @@ class TestDatabase(unittest.TestCase):
 
     def test_update_auditable_status(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        add_device("Router", vendor_id, model_id, "1.0.3")
+        product_id = add_product("RV340", vendor_id)
+        add_device("Router", vendor_id, product_id, "1.0.3")
         device_id = device_exists("Router", "RV340")[0]
-        update_auditable_status(device_id, True)
+        update_device_auditable_status(device_id, True)
         # Check update
         conn = get_connection()
         cursor = conn.cursor()
@@ -184,10 +184,10 @@ class TestDatabase(unittest.TestCase):
 
     def test_get_auditable_devices(self):
         vendor_id = add_vendor("cisco")
-        model_id = add_model("RV340", vendor_id)
-        add_device("Router", vendor_id, model_id, "1.0.3")
+        product_id = add_product("RV340", vendor_id)
+        add_device("Router", vendor_id, product_id, "1.0.3")
         device_id = device_exists("Router", "RV340")[0]
-        update_auditable_status(device_id, True)
+        update_device_auditable_status(device_id, True)
         auditable = get_auditable_devices()
         self.assertIsInstance(auditable, list)
         self.assertGreater(len(auditable), 0)

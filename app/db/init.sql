@@ -6,7 +6,7 @@ USE IoT_VulnMap;
 DROP TABLE IF EXISTS Exposes;
 DROP TABLE IF EXISTS Device;
 DROP TABLE IF EXISTS Vulnerability;
-DROP TABLE IF EXISTS Models;
+DROP TABLE IF EXISTS Products;
 DROP TABLE IF EXISTS Vendor;
 
 # Create tables
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS Vendor
     name_vl VARCHAR(64)
 );
 
-CREATE TABLE IF NOT EXISTS Models
+CREATE TABLE IF NOT EXISTS Products
 (
     id        INTEGER PRIMARY KEY AUTO_INCREMENT,
     name_ha   VARCHAR(64),
@@ -42,10 +42,10 @@ CREATE TABLE IF NOT EXISTS Device
     name             VARCHAR(64),
     firmware_version VARCHAR(64),
     vendor_id        INTEGER NULL,
-    model_id         INTEGER NULL,
+    product_id       INTEGER NULL,
     is_auditable     BOOLEAN,
     FOREIGN KEY (vendor_id) REFERENCES Vendor (id),
-    FOREIGN KEY (model_id) REFERENCES Models (id)
+    FOREIGN KEY (product_id) REFERENCES Products (id)
 );
 
 CREATE TABLE IF NOT EXISTS Exposes

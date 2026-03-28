@@ -1,52 +1,40 @@
-import requests
+"""
+This module fetches vulnerabilities from CIRCL's Vulnerability Lookup API
+for all auditable devices stored in the database and persists the results.
+"""
+
 from distutils.version import Version
 
 from app.src.database import *
-
-CIRCL_API_URL = "https://vulnerability.circl.lu/search"
-
-
-def search_vulnerabilities(vendor, product):
-    """
-    Search for vulnerabilities for a given vendor and product using CIRCL's API.
-    :param vendor: vendor name
-    :param product: product name
-    :return: list of vulnerabilities
-    """
-    try:
-        response = requests.get(f"{CIRCL_API_URL}/{vendor}/{product}")
-        return response.json()
-    except requests.exceptions.RequestException:
-        return []
+from vuln_lookup import get_vulnerabilities
 
 
 def find_all_vulnerabilities():
     """
-    For each device in the database, search for vulnerabilities using CIRCL's API,
+    Find all vulnerabilities for all auditable devices in the database and store them.
     """
-    # The devices in the list are auditable
     devices_list = get_auditable_devices()
 
-    for device_id, model, firmware, name_vl in devices_list:
+    for device_id, product, firmware, name_vl in devices_list:
         firmware_version, firmware_date = firmware
 
-        vulnerabilities = search_vulnerabilities(name_vl, model)
+        vulnerabilities = get_vulnerabilities(name_vl, product)
         for vulnerability in vulnerabilities:
-            # Getting firmware informations
+            # Extract firmware information
             nvd_data = vulnerability.get('fkie_nvd', {})
             configurations = nvd_data.get('configurations', [])
 
-            # Check if firmware is affected
+            # Check if firmware version is affected by the vulnerability
             if configurations and not is_firmware_affected(firmware_version, configurations):
                 continue
 
-            # Exclu CVE published before the device firmware release date
+            # Skip CVEs published before the device firmware release date
             cve_date = nvd_data.get('published')
             if cve_date and cve_date < firmware_date:
                 continue
 
             add_vulnerability(
-                cve=nvd_data.get('id'),
+                cve_id=nvd_data.get('id'),
                 cvss=nvd_data.get('metrics', {}).get('cvssMetricV2', [{}])[0].get('cvssData', {}).get('baseScore'),
                 descr=next((d['value'] for d in nvd_data.get('descriptions', []) if d['lang'] == 'en'), None),
                 severity=nvd_data.get('metrics', {}).get('cvssMetricV2', [{}])[0].get('baseSeverity'),
@@ -58,7 +46,8 @@ def find_all_vulnerabilities():
 def extract_affected_versions_from_configurations(configurations: list) -> tuple[list, bool]:
     """
     Extracts affected versions from NVD-style configurations.
-    Returns (list of versions, has_wildcard).
+    :param configurations: list of configurations
+    :return: tuple (list of affected versions, bool has_wildcard)
     """
     versions = []
     has_wildcard = False
@@ -84,8 +73,10 @@ def extract_affected_versions_from_configurations(configurations: list) -> tuple
 
 def is_firmware_affected(firmware_version: str, configurations: list) -> bool:
     """
-    Returns True if the firmware version is in the affected versions,
-    or if a wildcard is present (all versions affected).
+    Checks if the firmware version is in the affected versions or if a wildcard is present (all versions affected).
+    :param firmware_version: firmware version to check
+    :param configurations: list of configurations
+    :return: True if the firmware version is affected, False otherwise
     """
     affected_versions, has_wildcard = extract_affected_versions_from_configurations(configurations)
 

@@ -1,6 +1,8 @@
 """
-This module normalizes vendor names from Home Assistant to match those in Vulnerability Lookup.
+This module maps Home Assistant vendor and product names to their Vulnerability Lookup equivalents.
+It also loads pre-established mappings from a JSON file and updates device auditability status.
 """
+
 import json
 import os
 
@@ -14,8 +16,7 @@ MAPPINGS_PATH = os.path.join(BASE_DIR, "data", "mappings.json")
 
 def normalize_vendor():
     """
-    Matches Home Assistant vendor names to Vulnerability Lookup vendor names,
-    and updates device auditability status accordingly.
+    Matches Home Assistant vendor names to Vulnerability Lookup vendor names.
     """
     ha_vendors_list = database.get_vendors_without_vl()
     vl_vendors_list = vuln_lookup.get_vendors()
@@ -33,41 +34,41 @@ def normalize_vendor():
 
 def normalize_product():
     """
-    Matches Home Assistant model names to Vulnerability Lookup model names,
-    and updates device auditability status accordingly.
+    Matches Home Assistant model names to Vulnerability Lookup model names.
     """
-    ha_devices_list = database.get_models_without_vl()
-    for model_id, model_ha, vendor_vl in ha_devices_list:
-        if vendor_vl is None or model_ha is None: continue
+    ha_devices_list = database.get_products_without_vl()
+    for product_id, product_ha, vendor_vl in ha_devices_list:
+        if vendor_vl is None or product_ha is None: continue
 
-        if vuln_lookup.product_exists(model_ha, vendor_vl):
-            database.update_vl_model(model_id, model_ha.lower())
+        if vuln_lookup.product_exists(product_ha, vendor_vl):
+            database.update_vl_product(product_id, product_ha.lower())
         else:
-            found_vl_model = vuln_lookup.find_closest_product(model_ha, vendor_vl)
-            if found_vl_model:
-                database.update_vl_model(model_id, found_vl_model.lower())
+            found_vl_product = vuln_lookup.find_closest_product(product_ha, vendor_vl)
+            if found_vl_product:
+                database.update_vl_product(product_id, found_vl_product.lower())
 
 
 def update_auditable_status():
     """
-    Updates device auditable status accordingly.
-    :return:
+    Updates the auditable status of all devices in the database.
+    A device is considered auditable if it has a mapped vendor name, a mapped product name and a firmware version.
     """
     devices_list = get_all_devices()
 
-    for device_id, model_vl, firmware, vendor_vl in devices_list:
+    for device_id, product_vl, firmware, vendor_vl in devices_list:
         if (vendor_vl is not None  # vendor vl_name
-                and model_vl is not None  # device model
+                and product_vl is not None  # device product
                 and firmware is not None):  # device firmware
-            database.update_auditable_status(device_id, True)
+            database.update_device_auditable_status(device_id, True)
         else:
-            database.update_auditable_status(device_id, False)
+            database.update_device_auditable_status(device_id, False)
 
 
 def load_mapping(path=MAPPINGS_PATH):
     """
-    Loads vendor name mappings from a file and updates the database accordingly.
-    :param path: Path to the mapping file (json)
+    Loads pre-established vendor and product mappings from a JSON file
+    and updates the database with their Vulnerability Lookup equivalents.
+    :param path: path to the JSON file containing the mappings
     """
     with open(MAPPINGS_PATH, "r") as f:
         mappings = json.load(f)
@@ -81,9 +82,9 @@ def load_mapping(path=MAPPINGS_PATH):
             database.update_vl_vendor(vendor_id, vendor["vl_name"])
 
             for product in vendor["products"]:
-                existing_model = database.model_exists(product["ha_name"])
-                if existing_model is None:
-                    model_id = database.add_model(product["ha_name"], vendor_id)
+                existing_product = database.product_exists(product["ha_name"])
+                if existing_product is None:
+                    product_id = database.add_product(product["ha_name"], vendor_id)
                 else:
-                    model_id = existing_model[0]
-                database.update_vl_model(model_id, product["vl_name"])
+                    product_id = existing_product[0]
+                database.update_vl_product(product_id, product["vl_name"])

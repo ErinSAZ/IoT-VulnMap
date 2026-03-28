@@ -1,13 +1,10 @@
 """
-This module contains functions for finding vulnerabilities in CIRCL's API.
+This module provides utility functions to interact with CIRCL's Vulnerability Lookup API.
+It handles vendor and product search, as well as fuzzy matching for name normalization.
 """
-
-import json
 
 import requests
 from rapidfuzz.distance.metrics_cpp import levenshtein_distance
-
-# CONSTANTS
 
 FUZZY_THRESHOLD = 0.8
 VL_INSTANCE_URL = "https://vulnerability.circl.lu/"
@@ -17,39 +14,39 @@ VL_INSTANCE_URL = "https://vulnerability.circl.lu/"
 
 def get_vendors():
     """
-    Fetch the list of vendors from CIRCL's API.
+    Fetch the list of vendors from Vulnerability Lookup API.
     :return: list of vendors
     """
     try:
         content = requests.get(f"{VL_INSTANCE_URL}/api/browse")
-        return json.loads(content.text)
+        return content.json()
     except requests.exceptions.RequestException:
         return []
 
 
 def get_products(vendor):
     """
-    Fetch the list of products of a given vendor from CIRCL's API.
+    Fetch the list of products of a given vendor from Vulnerability Lookup API.
     :param vendor: vendor name
     :return: list of products
     """
     try:
         content = requests.get(f"{VL_INSTANCE_URL}/api/browse/{vendor}")
-        return json.loads(content.text)
+        return content.json()
     except requests.exceptions.RequestException:
         return []
 
 
 def get_vulnerabilities(vendor, product):
     """
-    Fetch the list of vulnerabilities for a given vendor and product from CIRCL's API.
+    Fetch the list of vulnerabilities for a given vendor and product from Vulnerability Lookup API.
     :param vendor: vendor name
     :param product: product name
     :return: list of vulnerabilities
     """
     try:
         content = requests.get(f"{VL_INSTANCE_URL}/api/search/{vendor}/{product}")
-        return json.loads(content.text)
+        return content.json()
     except requests.exceptions.RequestException:
         return []
 
@@ -58,7 +55,7 @@ def get_vulnerabilities(vendor, product):
 
 def vendor_exists(searched_vendor, vendors=None):
     """
-    Check if a given vendor exists in CIRCL's API.
+    Check if a given vendor exists in Vulnerability Lookup API.
     :param searched_vendor: vendor name
     :param vendors: list of vendors
     :return: True if the vendor exists, False otherwise
@@ -109,7 +106,7 @@ def find_closest_vendor(searched_vendor, vendors=None):
 
 def product_exists(searched_product, vendor):
     """
-    Check if a given product exists in CIRCL's API.
+    Check if a given product exists in Vulnerability Lookup API.
     :param searched_product: product name
     :param vendor: vulnerability_lookup's vendor name
     :return: True if the product exists, False otherwise
@@ -134,7 +131,7 @@ def find_closest_product(searched_product, vendor):
     Find the closest matching product name from the list of products of a given vendor using Levenshtein distance.
     :param searched_product: product name
     :param vendor: vulnerability_lookup's vendor name
-    :return: closest matching product name
+    :return: the closest matching product name
     """
     if searched_product is None:
         return None

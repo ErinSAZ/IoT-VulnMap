@@ -1,12 +1,15 @@
+"""
+This module provides functions to interact with the MySQL database.
+It handles vendors, products, devices and vulnerabilities storage and retrieval.
+"""
+
 import pymysql
 
 
-# ============================================
-# Database access functions
-# ============================================
-
-# Established and return a connexion to the database
 def get_connection():
+    """
+    Establish a connection to the MySQL database.
+    """
     return pymysql.connections.Connection(
         host="localhost",
         port=3307,
@@ -17,8 +20,14 @@ def get_connection():
     )
 
 
-# Add a new vendor to the database and return its ID
+# Vendors
+
 def add_vendor(name_vendor_ha):
+    """
+    Adds a new vendor to the database.
+    :param name_vendor_ha: new vendor name based on Home Assistant data
+    :return: id of the new vendor
+    """
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute("INSERT INTO Vendor (name_ha) values (%s)", (name_vendor_ha,))
@@ -29,8 +38,12 @@ def add_vendor(name_vendor_ha):
     return vendor_id
 
 
-# Check if a vendor with the given name_ha exists in the database and return its ID if found
 def vendor_exists(name_vendor_ha):
+    """
+    Checks if a vendor exists in the database.
+    :param name_vendor_ha: vendor name based on Home Assistant data
+    :return: id of the vendor if it exists else None
+    """
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute("SELECT id FROM Vendor WHERE name_ha = %s", (name_vendor_ha,))
@@ -40,8 +53,11 @@ def vendor_exists(name_vendor_ha):
     return existing_vendor
 
 
-# Return all the vendors who don't have a name_vl in the database
 def get_vendors_without_vl():
+    """
+    Retrieves all vendors without VulnerabilityLookup datas from the database.
+    :return: list of tuples (id, name_ha) of vendors
+    """
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute("SELECT id, name_ha FROM Vendor WHERE name_ha IS NOT NULL AND name_vl IS NULL")
@@ -51,85 +67,165 @@ def get_vendors_without_vl():
     return vendors_without_vl
 
 
-# Add a new model to the database and return its ID
-def add_model(name_model_ha, vendor_id):
-    # Check if model already exists
-    existing_model = model_exists(name_model_ha)
-    if existing_model:
-        return existing_model[0]  # Return existing ID
+def update_vl_vendor(vendor_id, vl_vendor):
+    """
+    Maps a vendor's Home Assistant name to its Vulnerability Lookup equivalent in the database.
+    :param vendor_id: id of the vendor in the database
+    :param vl_vendor: Vulnerability Lookup equivalent
+    """
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO Models (name_ha, vendor_id) values (%s, %s)", (name_model_ha, vendor_id))
-    model_id = cursor.lastrowid
-    connection.commit()
-    cursor.close()
-    connection.close()
-    return model_id
-
-
-# Check if a model with the given name_ha exists in the database and return its ID if found
-def model_exists(name_model_ha):
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("SELECT id FROM Models WHERE name_ha = %s", (name_model_ha,))
-    existing_model = cursor.fetchone()
-    cursor.close()
-    connection.close()
-    return existing_model
-
-
-# Return all the models who don't have a name_vl in the database
-def get_models_without_vl():
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute(
-        "SELECT Models.id, Models.name_ha, Vendor.name_vl FROM Models LEFT JOIN Vendor ON Models.vendor_id = Vendor.id WHERE Models.name_ha IS NOT NULL AND Models.name_vl IS NULL")
-    models_without_vl = list(cursor.fetchall())
-    cursor.close()
-    connection.close()
-    return models_without_vl
-
-
-# Add a new device to the database
-def add_device(name, vendor_id, model_id, firmware):
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute(
-        "INSERT INTO Device (name, firmware_version, vendor_id, model_id, is_auditable) values (%s,%s,%s,%s,%s)",
-        (name, firmware, vendor_id, model_id, False))
+    cursor.execute("UPDATE Vendor SET name_vl = %s WHERE id = %s", (vl_vendor, vendor_id))
     connection.commit()
     cursor.close()
     connection.close()
 
 
-# Check if a device with the given name and model exists in the database and return its ID if found
-def device_exists(name, model):
-    existing_model = model_exists(model)
-    if existing_model is None:
-        return None
-    model_id = existing_model[0]
+# Products
+
+def add_product(name_product_ha, vendor_id):
+    """
+    Adds a new product to the database.
+    :param name_product_ha: new product name based on Home Assistant data
+    :param vendor_id: id of the vendor in the database
+    :return: id of the new product
+    """
+    existing_product = product_exists(name_product_ha)
+    if existing_product:
+        return existing_product[0]
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id FROM Device WHERE name = %s AND model_id = %s", (name, model_id))
-    device = cursor.fetchone()
+    cursor.execute("INSERT INTO Products (name_ha, vendor_id) values (%s, %s)", (name_product_ha, vendor_id))
+    product_id = cursor.lastrowid
+    connection.commit()
     cursor.close()
     connection.close()
-    return device
+    return product_id
 
+
+def product_exists(name_product_ha):
+    """
+    Checks if a product exists in the database.
+    :param name_product_ha: product name based on Home Assistant data
+    :return: id of the product if it exists else None
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT id FROM Products WHERE name_ha = %s", (name_product_ha,))
+    existing_product = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return existing_product
+
+
+def get_products_without_vl():
+    """
+    Retrieves all products without VulnerabilityLookup datas from the database.
+    :return: list of tuples (id, name_ha) of products
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT Products.id, Products.name_ha, Vendor.name_vl FROM Products LEFT JOIN Vendor ON Products.vendor_id = Vendor.id WHERE Products.name_ha IS NOT NULL AND Products.name_vl IS NULL")
+    products_without_vl = list(cursor.fetchall())
+    cursor.close()
+    connection.close()
+    return products_without_vl
+
+
+def update_vl_product(product_id, vl_product):
+    """
+    Maps a product's Home Assistant name to its Vulnerability Lookup equivalent in the database.
+    :param product_id: id of the product in the database
+    :param vl_product: Vulnerability Lookup equivalent
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("UPDATE Products SET name_vl = %s WHERE id = %s", (vl_product, product_id))
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+
+# Devices
 
 def get_all_devices():
+    """
+    Retrieves all devices from the database.
+    :return: list of tuples (id, name_vl, firmware_version, vendor_name_vl) of devices
+    """
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute(
-        "SELECT Device.id, Models.name_vl, Device.firmware_version, Vendor.name_vl FROM Device LEFT JOIN Models ON Device.model_id = Models.id LEFT JOIN Vendor ON Device.vendor_id = Vendor.id")
+        "SELECT Device.id, Products.name_vl, Device.firmware_version, Vendor.name_vl FROM Device LEFT JOIN Products ON Device.product_id = Products.id LEFT JOIN Vendor ON Device.vendor_id = Vendor.id")
     all_devices = list(cursor.fetchall())
     cursor.close()
     connection.close()
     return all_devices
 
 
-# Remove the device with the given id in the database
+def get_auditable_devices():
+    """
+    Gets all auditable devices in the database.
+    :return: list of tuples (id, product_name_vl, firmware_version, vendor_name_vl) of auditable devices
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT Device.id, Products.name_vl, Device.firmware_version, Vendor.name_vl "
+                   "FROM Device LEFT JOIN Products ON Device.product_id = Products.id LEFT JOIN Vendor ON Device.vendor_id = Vendor.id "
+                   "WHERE Device.is_auditable = TRUE")
+    auditable_devices = list(cursor.fetchall())
+    cursor.close()
+    connection.close()
+    return auditable_devices
+
+
+def add_device(name, vendor_id, product_id, firmware):
+    """
+    Adds a new device to the database.
+    :param name: Friendly name of the device
+    :param vendor_id: id of the vendor in the database
+    :param product_id: id of the product in the database
+    :param firmware: firmware version of the device based on Home Assistant data
+    :return: id of the new device
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        "INSERT INTO Device (name, firmware_version, vendor_id, product_id, is_auditable) values (%s,%s,%s,%s,%s)",
+        (name, firmware, vendor_id, product_id, False))
+    device_id = cursor.lastrowid
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return device_id
+
+
+def device_exists(name, product):
+    """
+    Checks if a device exists in the database.
+    :param name: Friendly name of the device
+    :param product: id of the product in the database
+    :return: id of the device if it exists else None
+    """
+    existing_product = product_exists(product)
+    if existing_product is None:
+        return None
+    product_id = existing_product[0]
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT id FROM Device WHERE name = %s AND product_id = %s", (name, product_id))
+    device = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return device
+
+
 def remove_device(id):
+    """
+    Removes a device from the database.
+    :param id: id of the device in the database
+    """
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute("DELETE FROM Device WHERE id = %s", (id,))
@@ -138,19 +234,44 @@ def remove_device(id):
     connection.close()
 
 
-# Add a new vulnerability to the database and link it with devices
-def add_vulnerability(cve, cvss, descr, severity, date, device_id):
+def update_device_auditable_status(device_id, is_auditable):
+    """
+    Updates the auditable status of the device in the database.
+    :param device_id: id of the device in the database
+    :param is_auditable: boolean indicating if the device is auditable or not
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("UPDATE Device SET is_auditable = %s WHERE id = %s", (is_auditable, device_id))
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+
+# Vulnerabilities
+
+def add_vulnerability(cve_id, cvss, descr, severity, date, device_id):
+    """
+    Adds a vulnerability to the database and links it to a device.
+    :param cve_id: CVE identifier of the vulnerability
+    :param cvss: CVSS of the vulnerability
+    :param descr: Description of the vulnerability
+    :param severity: Severity of the vulnerability
+    :param date: Date of the vulnerability
+    :param device_id: id of the device in the database
+    :return:
+    """
     connection = get_connection()
     cursor = connection.cursor()
 
-    # Verify if vulnerability already exists
-    cursor.execute("SELECT id FROM Vulnerability WHERE cve_id = %s", (cve,))
+    # Check if vulnerability already exists
+    cursor.execute("SELECT id FROM Vulnerability WHERE cve_id = %s", (cve_id,))
     existing_vulnerability = cursor.fetchone()
 
     if existing_vulnerability is None:
         cursor.execute(
             "INSERT INTO Vulnerability (cve_id,cvss_score,description,severity,published_date) values (%s,%s,%s,%s,%s)",
-            (cve, cvss, descr, severity, date))
+            (cve_id, cvss, descr, severity, date))
         vulnerability_id = cursor.lastrowid
     else:
         vulnerability_id = existing_vulnerability[0]
@@ -164,8 +285,13 @@ def add_vulnerability(cve, cvss, descr, severity, date, device_id):
     connection.close()
 
 
-# Add a new exposes relation between a device and a vulnerability in the database
 def add_exposes(device_id, vulnerability_id, date):
+    """
+    Adds an exposes to the database between device and vulnerability.
+    :param device_id: id of the device in the database
+    :param vulnerability_id: id of the vulnerability in the database
+    :param date: date of the expose
+    """
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute("INSERT INTO Exposes (device_id,vulnerability_id,detected_date) values (%s,%s,%s)",
@@ -173,46 +299,3 @@ def add_exposes(device_id, vulnerability_id, date):
     connection.commit()
     cursor.close()
     connection.close()
-
-
-# Update the vulnerability lookup name of a vendor
-def update_vl_vendor(vendor_id, vl_vendor):
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("UPDATE Vendor SET name_vl = %s WHERE id = %s", (vl_vendor, vendor_id))
-    connection.commit()
-    cursor.close()
-    connection.close()
-
-
-# Update the vulnerability lookup name of a model
-def update_vl_model(model_id, vl_model):
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("UPDATE Models SET name_vl = %s WHERE id = %s", (vl_model, model_id))
-    connection.commit()
-    cursor.close()
-    connection.close()
-
-
-# Update the auditable status of a device
-def update_auditable_status(device_id, is_auditable):
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("UPDATE Device SET is_auditable = %s WHERE id = %s", (is_auditable, device_id))
-    connection.commit()
-    cursor.close()
-    connection.close()
-
-
-# Get all auditable devices with their model, firmware version and vulnerability lookup vendor name
-def get_auditable_devices():
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("SELECT Device.id, Models.name_vl, Device.firmware_version, Vendor.name_vl "
-                   "FROM Device LEFT JOIN Models ON Device.model_id = Models.id LEFT JOIN Vendor ON Device.vendor_id = Vendor.id "
-                   "WHERE Device.is_auditable = TRUE")
-    auditable_devices = list(cursor.fetchall())
-    cursor.close()
-    connection.close()
-    return auditable_devices
