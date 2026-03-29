@@ -5,15 +5,18 @@
   - [Overview](#overview)
   - [Findings](#findings)
   - [Limitations & observations](#limitations--observations)
+  - [Results](#results)
 - [CIRCL Vulnerability Lookup API](#circl-vulnerability-lookup-api)
   - [Approach 1 - Web Scraping](#approach-1---web-scraping)
     - [Overview](#overview-1)
     - [Findings](#findings-1)
     - [Limitations & observations](#limitations--observations-1)
+    - [Results](#results-1)
   - [Approach 2 - JSON API](#approach-2---json-api)
     - [Overview](#overview-2)
     - [Findings](#findings-2)
     - [Limitations & observations](#limitations--observations-2)
+    - [Results](#results-2)
 - [References](#references)
 
 ## Home Assistant API

@@ -248,11 +248,17 @@ IoT-VulnMap/
 │   ├── .env
 │   └── docker-compose.yml
 ├── images/
+│   └── IoT-VulnMap-Default-1024x1024@1x.png
 ├── research/
 │   └── tests/
 │       └── home-assistant_api/
 │           ├── ha_devices_example.json
 │           └── test_homeassistant_device.py
+│       └── vulnerability-lookup_api/
+│           ├── ha_products_by_vendor_example.json
+│           └── test_ha_api_getlistproductbyvendor.py
+│       └── vulnerability-lookup_website/
+│           ├── test_ha_getnumbercvebyvendor.py
 ├── README.md
 ├── Research.md
 └── requirements.txt
