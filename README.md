@@ -240,6 +240,21 @@ The only requirement to run this project is to have **Docker** and **Docker Comp
   ```sh
   python --version
   ```
+  
+(Optional)* If you want to contribute or run the project locally outside of
+  Docker, it is recommended to create a virtual environment:
+
+* Create a virtual environment (optional)*
+```sh
+python -m venv venv
+```
+* Activate the virtual environment (optional)*
+```sh
+# On Windows
+venv\Scripts\activate
+# On Linux or MacOS
+source venv/bin/activate
+```
 
 ### Project structure
 
