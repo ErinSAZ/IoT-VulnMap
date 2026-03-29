@@ -244,7 +244,7 @@ IoT-VulnMap/
 │   │   ├── database_tests.py
 │   │   ├── echantillon.json
 │   │   ├── find_vulnerabilities_tests.py
-│   │   └── put_into_bdd.sql
+│   │   └── sample_vulnerable_devices.sql
 │   ├── .env
 │   └── docker-compose.yml
 ├── images/
