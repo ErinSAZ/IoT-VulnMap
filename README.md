@@ -40,9 +40,31 @@ identify known CVEs.
 The application follows a 4-step pipeline:
 
 1. **Discovery :** <br>
+The goal of this first step is to retrieve the list of devices registered in Home Assistant, along with their associated 
+information such as vendor, product, and firmware version. This information is crucial for the subsequent steps of 
+normalization and vulnerability assessment. The discovery process involves connecting to the Home Assistant instance, 
+extracting the relevant data about the devices, and storing it in the database.
+
 2. **Normalization :** <br>
+The second step focuses on normalizing the retrieved data to ensure consistency and compatibility with the CIRCL's 
+instance of Vulnerability Lookup. This involves standardizing the vendor and product names, as well as the firmware 
+versions, to align with the naming conventions used in the vulnerability database. The normalization process may 
+involve techniques such as fuzzy matching, pre-established mappings to ensure that the data is properly formatted for 
+accurate vulnerability assessment.
+
 3. **Audit :** <br>
+In this step, the normalized data is used to query the CIRCL's instance of Vulnerability Lookup to identify any known
+vulnerabilities associated with the registered devices. The audit process involves comparing the device information with
+the vulnerability database to determine if there are any matches. This includes checking for known CVEs that affect the 
+specific vendor, product, and firmware version of the device. The results of the audit are then stored in the database 
+for further analysis and reporting.
+
 4. **Storage :** <br>
+The final step involves storing the results of the discovery, normalization, and audit processes in a structured 
+database. This allows for easy retrieval and analysis of the data, as well as the ability to track vulnerabilities over 
+time. The storage process involves designing a database schema that can accommodate the various types of data collected, 
+including device information, vulnerability details, and the relationships between them. This structured storage enables 
+users to easily access and manage the information about their IoT devices and their associated vulnerabilities.
 
 A device is considered **auditable** if it has a known vendor, a known product, and a firmware version, all successfully
 mapped to CIRCL's naming convention.
@@ -103,12 +125,12 @@ erDiagram
 #### Vendor normalization
 
 When retrieving IoT data from Home-Assistant, we found that vendors were not standardized. For example, "Amazon" could 
-be written in different ways such as "Amazon.com", "Amazon Inc.", etc. However, in the vulnerability lookup API, each 
-vendor is uniquely standardized. Therefore, we had to create a mapping table to standardize the vendors and avoid 
-duplicates in our database. We also had to create a normalization function that retrieves the vendors as they are found 
-in the vulnerability lookup API and associates them with the vendors present in our database. This task was complex and 
-required particular attention to ensure that the data was properly aligned with the standards of the vulnerability 
-lookup API.
+be written in different ways such as "Amazon.com", "Amazon Inc.", etc. However, in the CIRCL's instance of Vulnerability 
+Lookup, each vendor is uniquely standardized. Therefore, we had to create a mapping table to standardize the vendors 
+and avoid duplicates in our database. We also had to create a normalization function that retrieves the vendors as they 
+are found in the vulnerability lookup API and associates them with the vendors present in our database. This task was
+complex and required particular attention to ensure that the data was properly aligned with the standards of the 
+CIRCL's instance of Vulnerability Lookup.
 
 #### Product normalization
 
@@ -116,18 +138,18 @@ As the same for vendors, products were not standardized in the data retrieved fr
 product like "Echo Dot" could be referenced in different ways such as "Echo Dot 3rd Gen", "Amazon Echo Dot", etc. This 
 posed a similar problem to that of vendors, as the vulnerability lookup API uses standardized product names to perform 
 vulnerability searches. Therefore, we had to create a mapping table for products to ensure that the product names in our
-database were aligned with those used by the vulnerability lookup API. This task was particularly complex due to the 
-wide variety of IoT products and the different ways they can be referenced. Of course, they might be mistakes in the 
-mapping tables, which could lead to some devices not being properly assessed for vulnerabilities.
+database were aligned with those used by theCIRCL's instance of Vulnerability Lookup. This task was particularly complex 
+due to the wide variety of IoT products and the different ways they can be referenced. Of course, they might be mistakes 
+in the mapping tables, which could lead to some devices not being properly assessed for vulnerabilities.
 
 #### Vulnerability parsing
 
-When retrieving vulnerability data from the vulnerability lookup API, we encountered difficulties in parsing the
-vulnerability information. The API returns a large amount of data for each vulnerability, including the CVE ID, 
-CVSS score, description, severity, and published date. However, the format of this data can vary, and some fields may 
-be missing or incomplete. Also, we have to compare firmware versions and published dates to determine if a vulnerability 
-is relevant for a specific device, which can be complex due to the variety of formats used for firmware versions and 
-dates. 
+When retrieving vulnerability data from the CIRCL's instance of Vulnerability Lookup, we encountered difficulties in 
+parsing the vulnerability information. The instance returns a large amount of data for each vulnerability, including the
+CVE ID, CVSS score, description, severity, and published date. However, the format of this data can vary, and some 
+fields may be missing or incomplete. Also, we have to compare firmware versions and published dates to determine if a 
+vulnerability is relevant for a specific device, which can be complex due to the variety of formats used for firmware 
+versions and dates. 
 
 ##TODO : EXPLIQUER FINALEMENT COMMENT ON A FAIT
 
