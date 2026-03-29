@@ -98,6 +98,23 @@ extract the relevant information from the HTML response. Furthermore, there may 
 that can be made to the CIRCL website, which could impact the performance of our application if we need to retrieve 
 vulnerability information for a large number of devices.
 
+### Results
+The script successfully retrieved the number of vulnerabilities for each vendor present in the Home Assistant device 
+list. The results are like the following:
+
+| Vendor                         | CVE count |
+|--------------------------------|-----------|
+| Risco                          | 0         |
+| N/A                            | 0         |
+| Google Inc.                    | 960       |
+| Tuya                           | 8         |
+| Home Assistant Community Store | 0         |
+| Apple                          | 8324      |
+| IKEA of Sweden                 | 0         |
+| Home Assistant Community Apps  | 0         |
+| Sony                           | 51        |
+| Freebox                        | 0         |
+
 ---
 
 ### Approach 2 - JSON API
@@ -140,6 +157,10 @@ information. Additionally, there is no fuzzy search available in API, meaning th
 in Home Assistant and the one in the database results in an empty response. Furthermore, the API may have rate limits or
 other restrictions that could impact the performance of our application if we need to retrieve vulnerability information 
 for a large number of devices.
+
+#### Results
+The script successfully retrieved the list of products associated with each vendor present in the Home Assistant device
+list, using the CIRCL Vulnerability Lookup API. The results were saved in the `ha_products_by_vendor_example` JSON file.
 
 ---
 
