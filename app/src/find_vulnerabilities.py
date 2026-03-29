@@ -3,105 +3,129 @@ This module fetches vulnerabilities from CIRCL's Vulnerability Lookup API
 for all auditable devices stored in the database and persists the results.
 """
 
-from distutils.version import Version
+from datetime import date
+from packaging.version import Version, InvalidVersion
 
-import requests
+from database import add_vulnerability, get_auditable_devices
+from vuln_lookup import get_vulnerabilities
 
-from app.src.database import *
-from vuln_lookup import get_vulnerabilities, VL_INSTANCE_URL
 
-#TODO a refaire de 0 car complexe
 def find_all_vulnerabilities():
     """
-    Find all vulnerabilities for all auditable devices in the database and store them.
+    For each auditable device in the database, fetch CVEs from CIRCL
+    and store those affecting the device's firmware version.
     """
-    devices_list = get_auditable_devices()
+    devices = get_auditable_devices()
 
-    for device_id, product, firmware, name_vl in devices_list:
-        firmware_version = firmware
-        firmware_date = None
+    for device_id, product_vl, firmware, vendor_vl in devices:
+        if not product_vl or not vendor_vl or not firmware:
+            continue
 
-        vulnerabilities = get_vulnerabilities(name_vl, product)
-        vuln_list = vulnerabilities['results']['nvd']
-        for vulnerability in vuln_list:
-            # Extract firmware information
-            nvd_data = vulnerability.get('fkie_nvd', {})
-            configurations = nvd_data.get('configurations', [])
+        response = get_vulnerabilities(vendor_vl, product_vl)
+        entries = response.get('results', {}).get('nvd', [])
 
-            # Check if firmware version is affected by the vulnerability
-            if configurations and not is_firmware_affected(firmware_version, configurations):
+        for entry in entries:
+            cve_id, cve_data = entry[0], entry[1]
+
+            cve_metadata = cve_data.get('cveMetadata', {})
+            containers = cve_data.get('containers', {})
+            cna = containers.get('cna', {})
+            adp_list = containers.get('adp', [])
+
+            # Extract CVE ID
+            cve_id = cve_metadata.get('cveId', cve_id).upper()
+
+            # Extract published date
+            published_raw = cve_metadata.get('datePublished')
+            published_date = published_raw[:10] if published_raw else str(date.today())
+
+            # Extract description (english)
+            descriptions = cna.get('descriptions', [])
+            description = next((d['value'] for d in descriptions if d.get('lang') == 'en'), None)
+
+            # Extract CVSS — try cna.metrics first, then adp.metrics
+            cvss_score, severity = extract_cvss(cna.get('metrics', []), adp_list)
+
+            # Extract affected versions
+            affected_versions = []
+            for affected in cna.get('affected', []):
+                affected_versions.extend(affected.get('versions', []))
+
+            # Check if firmware is affected — if no version info, include by default
+            if affected_versions and not is_firmware_affected(firmware, affected_versions):
                 continue
 
-            # Skip CVEs published before the device firmware release date
-            cve_date = nvd_data.get('published')
-            if cve_date and firmware_date and cve_date < firmware_date:
+            try:
+                add_vulnerability(
+                    cve_id=cve_id,
+                    cvss=cvss_score,
+                    descr=description,
+                    severity=severity,
+                    date=published_date,
+                    device_id=device_id
+                )
+            except Exception as e:
                 continue
 
-            add_vulnerability(
-                cve_id=nvd_data.get('id'),
-                cvss=nvd_data.get('metrics', {}).get('cvssMetricV2', [{}])[0].get('cvssData', {}).get('baseScore'),
-                descr=next((d['value'] for d in nvd_data.get('descriptions', []) if d['lang'] == 'en'), None),
-                severity=nvd_data.get('metrics', {}).get('cvssMetricV2', [{}])[0].get('baseSeverity'),
-                date=cve_date,
-                device_id=device_id
-            )
 
-
-
-def extract_affected_versions_from_configurations(configurations: list) -> tuple[list, bool]:
+def extract_cvss(cna_metrics: list, adp_list: list) -> tuple:
     """
-    Extracts affected versions from NVD-style configurations.
-    :param configurations: list of configurations
-    :return: tuple (list of affected versions, bool has_wildcard)
+    Extracts CVSS score and severity from cna.metrics or adp.metrics.
+    Tries cna first, then adp as fallback.
+    :param cna_metrics: metrics list from cna container
+    :param adp_list: list of adp containers
+    :return: tuple (cvss_score, severity)
     """
-    versions = []
-    has_wildcard = False
+    # Try cna metrics first
+    for metric in cna_metrics:
+        cvss_data = metric.get('cvssV3_1') or metric.get('cvssV3_0') or metric.get('cvssV2_0')
+        if cvss_data:
+            return cvss_data.get('baseScore'), cvss_data.get('baseSeverity')
 
-    for config in configurations:
-        for node in config.get('nodes', []):
-            for cpe_match in node.get('cpeMatch', []):
-                if not cpe_match.get('vulnerable', False):
-                    continue
+    # Fallback to adp metrics
+    for adp in adp_list:
+        for metric in adp.get('metrics', []):
+            cvss_data = metric.get('cvssV3_1') or metric.get('cvssV3_0') or metric.get('cvssV2_0')
+            if cvss_data:
+                return cvss_data.get('baseScore'), cvss_data.get('baseSeverity')
 
-                criteria = cpe_match.get('criteria', '')
-                parts = criteria.split(':')
-
-                if len(parts) >= 6:
-                    version = parts[5]
-                    if version == '*':
-                        has_wildcard = True
-                    else:
-                        versions.append(version)
-
-    return versions, has_wildcard
+    return None, None
 
 
-def is_firmware_affected(firmware_version: str, configurations: list) -> bool:
+def is_firmware_affected(firmware_version: str, versions: list) -> bool:
     """
-    Checks if the firmware version is in the affected versions or if a wildcard is present (all versions affected).
-    :param firmware_version: firmware version to check
-    :param configurations: list of configurations
-    :return: True if the firmware version is affected, False otherwise
+    Checks if the given firmware version is affected based on the CVE version ranges.
+    :param firmware_version: firmware version string from the device
+    :param versions: list of version dicts from CIRCL's API
+    :return: True if the firmware is affected, False otherwise
     """
-    affected_versions, has_wildcard = extract_affected_versions_from_configurations(configurations)
-
     try:
         fw = Version(firmware_version)
-        for v in affected_versions:
-            status = v.get('status')
-            if status != 'affected':
-                continue
+    except InvalidVersion:
+        # If version cannot be parsed, assume affected to avoid missing vulnerabilities
+        return True
 
-            less_than = v.get('lessThan')
-            less_than_or_equal = v.get('lessThanOrEqual')
-            exact = v.get('version')
+    for v in versions:
+        if v.get('status') != 'affected':
+            continue
 
+        less_than = v.get('lessThan')
+        less_than_or_equal = v.get('lessThanOrEqual')
+        exact = v.get('version')
+
+        try:
             if less_than and fw < Version(less_than):
                 return True
             if less_than_or_equal and fw <= Version(less_than_or_equal):
                 return True
-            if exact and exact != '0' and fw == Version(exact):
+            if exact and exact not in ('0', '*') and fw == Version(exact):
                 return True
+        except InvalidVersion:
+            # If range version cannot be parsed, include the CVE to be safe
+            return True
 
-    except Exception as e:
-        return False
+    return False
+
+
+if __name__ == "__main__":
+    find_all_vulnerabilities()

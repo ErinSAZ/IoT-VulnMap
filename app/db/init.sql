@@ -6,7 +6,7 @@ USE IoT_VulnMap;
 DROP TABLE IF EXISTS Exposes;
 DROP TABLE IF EXISTS Device;
 DROP TABLE IF EXISTS Vulnerability;
-DROP TABLE IF EXISTS Products;
+DROP TABLE IF EXISTS Product;
 DROP TABLE IF EXISTS Vendor;
 
 # Create tables

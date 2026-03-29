@@ -2,8 +2,10 @@
 This module provides functions to interact with the MySQL database.
 It handles vendors, products, devices and vulnerabilities storage and retrieval.
 """
+from datetime import datetime
 
 import pymysql
+from pymysql import DATE
 
 
 def get_connection():
@@ -95,7 +97,7 @@ def add_product(name_product_ha, vendor_id):
         return existing_product[0]
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO Products (name_ha, vendor_id) values (%s, %s)", (name_product_ha, vendor_id))
+    cursor.execute("INSERT INTO Product (name_ha, vendor_id) values (%s, %s)", (name_product_ha, vendor_id))
     product_id = cursor.lastrowid
     connection.commit()
     cursor.close()
@@ -111,7 +113,7 @@ def product_exists(name_product_ha):
     """
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id FROM Products WHERE name_ha = %s", (name_product_ha,))
+    cursor.execute("SELECT id FROM Product WHERE name_ha = %s", (name_product_ha,))
     existing_product = cursor.fetchone()
     cursor.close()
     connection.close()
@@ -126,7 +128,7 @@ def get_products_without_vl():
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute(
-        "SELECT Products.id, Products.name_ha, Vendor.name_vl FROM Products LEFT JOIN Vendor ON Products.vendor_id = Vendor.id WHERE Products.name_ha IS NOT NULL AND Products.name_vl IS NULL")
+        "SELECT Product.id, Product.name_ha, Vendor.name_vl FROM Product LEFT JOIN Vendor ON Product.vendor_id = Vendor.id WHERE Product.name_ha IS NOT NULL AND Product.name_vl IS NULL")
     products_without_vl = list(cursor.fetchall())
     cursor.close()
     connection.close()
@@ -141,7 +143,7 @@ def update_vl_product(product_id, vl_product):
     """
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("UPDATE Products SET name_vl = %s WHERE id = %s", (vl_product, product_id))
+    cursor.execute("UPDATE Product SET name_vl = %s WHERE id = %s", (vl_product, product_id))
     connection.commit()
     cursor.close()
     connection.close()
@@ -157,7 +159,7 @@ def get_all_devices():
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute(
-        "SELECT Device.id, Products.name_vl, Device.firmware_version, Vendor.name_vl FROM Device LEFT JOIN Products ON Device.product_id = Products.id LEFT JOIN Vendor ON Device.vendor_id = Vendor.id")
+        "SELECT Device.id, Product.name_vl, Device.firmware_version, Vendor.name_vl FROM Device LEFT JOIN Product ON Device.product_id = Product.id LEFT JOIN Vendor ON Device.vendor_id = Vendor.id")
     all_devices = list(cursor.fetchall())
     cursor.close()
     connection.close()
@@ -171,8 +173,8 @@ def get_auditable_devices():
     """
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT Device.id, Products.name_vl, Device.firmware_version, Vendor.name_vl "
-                   "FROM Device LEFT JOIN Products ON Device.product_id = Products.id LEFT JOIN Vendor ON Device.vendor_id = Vendor.id "
+    cursor.execute("SELECT Device.id, Product.name_vl, Device.firmware_version, Vendor.name_vl "
+                   "FROM Device LEFT JOIN Product ON Device.product_id = Product.id LEFT JOIN Vendor ON Device.vendor_id = Vendor.id "
                    "WHERE Device.is_auditable = TRUE")
     auditable_devices = list(cursor.fetchall())
     cursor.close()
@@ -276,9 +278,11 @@ def add_vulnerability(cve_id, cvss, descr, severity, date, device_id):
     else:
         vulnerability_id = existing_vulnerability[0]
 
+    # Get the date
+
     # Link vulnerability to device if not already linked
     cursor.execute("INSERT INTO Exposes (device_id,vulnerability_id,detected_date) values (%s,%s,%s)",
-                   (device_id, vulnerability_id, date))
+                   (device_id, vulnerability_id, datetime.now().date()))
 
     connection.commit()
     cursor.close()

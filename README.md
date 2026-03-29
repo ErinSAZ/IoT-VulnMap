@@ -111,42 +111,43 @@ users to easily access and manage the information about their IoT devices and th
 ```mermaid
 erDiagram
     Vendor {
-        INT id PK
-        VARCHAR name_ha
-        VARCHAR name_vl
+    INT id PK
+    VARCHAR name_ha
+    VARCHAR name_vl
     }
     Product {
-        INT id PK
-        VARCHAR name_ha
-        VARCHAR name_vl
-        INT vendor_id FK
+    INT id PK
+    VARCHAR name_ha
+    VARCHAR name_vl
+    INT vendor_id FK
     }
     Device {
-        INT id PK
-        VARCHAR name
-        VARCHAR firmware_version
-        INT vendor_id FK
-        INT product_id FK
-        BOOLEAN is_auditable
+    INT id PK
+    VARCHAR name
+    VARCHAR firmware_version
+    INT vendor_id FK
+    INT product_id FK
+    BOOLEAN is_auditable
     }
     Vulnerability {
-        INT id PK
-        VARCHAR cve_id
-        FLOAT cvss_score
-        TEXT description
-        VARCHAR severity
-        DATE published_date
+    INT id PK
+    VARCHAR cve_id
+    FLOAT cvss_score
+    TEXT description
+    VARCHAR severity
+    DATE published_date
     }
     Exposes {
-        INT device_id FK
-        INT vulnerability_id FK
-        DATE detected_date
+    INT device_id FK
+    INT vulnerability_id FK
+    DATE detected_date
+    DATE resolved_date
     }
-    Vendor ||--o{ Product: "offers"
-    Vendor |o--o{ Device: "manufactures"
-    Product |o--o{ Device: "identifies"
-    Device ||--o{ Exposes: "has"
-    Vulnerability ||--o{ Exposes: "affects"
+    Vendor ||--o{ Product : "offers"
+    Vendor |o--o{ Device : "manufactures"
+    Product |o--o{ Device : "identifies"
+    Device ||--o{ Exposes : "has"
+    Vulnerability ||--o{ Exposes : "affects"
 ```
 
 #### Fuzzy matching
