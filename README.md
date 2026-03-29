@@ -151,8 +151,24 @@ erDiagram
 ```
 
 #### Fuzzy matching
+Initially, we attempt to perform a direct match between the vendor and product names retrieved from Home Assistant and
+those used in the CIRCL's instance of Vulnerability Lookup. However, due to inconsistencies in naming conventions, we
+often encounter cases where the names do not match directly. In such cases, we employ fuzzy matching techniques to find
+the closest match between the two sets of names. This involves calculating a similarity score based on the Levenshtein 
+distance or other string similarity metrics to determine how closely the names align. If the similarity score exceeds a 
+certain threshold, we consider it a match and proceed with the vulnerability assessment. This approach allows us to 
+handle variations in naming and improve the accuracy of our vulnerability detection process, although it may not always 
+yield perfect results, and some manual verification may be necessary to ensure the correctness of the matches.
 
 #### Pre-established mappings
+Given the complexity of standardizing vendor and product names, we have created pre-established mapping tables that 
+associate the various ways vendors and products are referenced in Home Assistant with the standardized names used in 
+the CIRCL's instance of Vulnerability Lookup. These mapping tables serve as a reference to ensure that the data we 
+retrieve from Home Assistant is properly aligned with the naming conventions used in the vulnerability database. By 
+using these pre-established mappings, we can improve the accuracy of our normalization process and ensure that we are 
+correctly identifying vulnerabilities associated with the registered devices. However, it is important to note that 
+these mappings may not cover all possible variations in naming, and there may still be cases where manual verification 
+is necessary to ensure the correctness of the matches. 
 
 #### Auditable vs non-auditable
 A device is considered **auditable** if it has a known vendor, a known product, and a firmware version, all successfully
