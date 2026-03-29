@@ -291,12 +291,12 @@ IoT-VulnMap/
    ```
 5. Create a `.env` file in the root directory of the project and add the following environment variables:
    ```env
-   DB_ROOT_PASSWORD=rootpassword
-   DB_USER=user
-   DB_PASSWORD=password
-   
-   HA_URL=http://homeassistant.local:8123
-   HA_TOKEN=your_home_assistant_long_lived_access_token
+    DB_ROOT_PASSWORD=rootpassword
+    DB_USER=user
+    DB_PASSWORD=password
+    
+    HA_HOST=homeassistant.local:8123
+    HA_TOKEN=your_home_assistant_long_lived_access_token
    ```
 
 6. Start the application using Docker Compose
