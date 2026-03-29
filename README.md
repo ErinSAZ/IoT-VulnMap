@@ -1,16 +1,9 @@
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
-
-<h1 align="center">IoT-VulnMap</h1>
-  <p align="center">
-   A threat intelligence tool that automatically detects vulnerabilities in IoT devices registered in Home Assistant
-</p>
+<div>
+    <img src="images/IoT-VulnMap-Default-1024x1024@1x.png" width="125" alt="App icon" align="left" style="margin-right: 20px;"/>
+    <h1>IoT-VulnMap</h1>
+    <p>A threat intelligence tool that automatically detects vulnerabilities in IoT devices registered in Home Assistant</p>
+    <br>
 </div>
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
