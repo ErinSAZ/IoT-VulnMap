@@ -101,7 +101,7 @@ extract the relevant information from the HTML response. Furthermore, there may 
 that can be made to the CIRCL website, which could impact the performance of our application if we need to retrieve 
 vulnerability information for a large number of devices.
 
-### Results
+#### Results
 The script successfully retrieved the number of vulnerabilities for each vendor present in the Home Assistant device 
 list. The results are like the following:
 
