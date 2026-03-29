@@ -258,6 +258,13 @@ IoT-VulnMap/
 └── requirements.txt
 ```
 ### Installation
+**Before starting**, make sure to change the default database credentials in 'docker-compose.yml' to secure values :
+```yaml
+MYSQL_ROOT_PASSWORD: your_secure_root_password
+MYSQL_USER: your_secure_user
+MYSQL_PASSWORD: your_secure_password
+```
+
 1. Clone the repository
    ```sh
    git clone https://github.com/ErinSAZ/IoT-VulnMap.git
