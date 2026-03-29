@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS Device
     product_id       INTEGER NULL,
     is_auditable     BOOLEAN,
     FOREIGN KEY (vendor_id) REFERENCES Vendor (id),
-    FOREIGN KEY (product_id) REFERENCES Products (id)
+    FOREIGN KEY (product_id) REFERENCES Product (id)
 );
 
 CREATE TABLE IF NOT EXISTS Exposes
