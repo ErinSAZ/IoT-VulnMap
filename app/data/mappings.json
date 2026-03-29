@@ -1,0 +1,62 @@
+{
+  "vendors": [
+    {
+      "ha_name": "Apple",
+      "vl_name": "apple",
+      "products": [
+        {
+          "ha_name": "iPhone14,3",
+          "vl_name": "iphone_os"
+        },
+        {
+          "ha_name": "iPad14,8",
+          "vl_name": "ipados"
+        }
+      ]
+    },
+    {
+      "ha_name": "EZVIZ",
+      "vl_name": "ezviz",
+      "products": []
+    },
+    {
+      "ha_name": "Freebox",
+      "vl_name": "freebox",
+      "products": []
+    },
+    {
+      "ha_name": "Google inc.",
+      "vl_name": "google inc.",
+      "products": []
+    },
+    {
+      "ha_name": "Home Assistant",
+      "vl_name": "home-assistant",
+      "products": [
+        {
+          "ha_name": "Home Assistant Core",
+          "vl_name": "core"
+        },
+        {
+          "ha_name": "Home Assistant Supervisor",
+          "vl_name": "supervisor"
+        }
+      ]
+    },
+    {
+      "ha_name": "IKEA of Sweden",
+      "vl_name": "ikea",
+      "products": []
+    },
+    {
+      "ha_name": "Sony",
+      "vl_name": "sony",
+      "products": []
+    },
+    {
+      "ha_name": "Tuya",
+      "vl_name": "tuya",
+      "products": []
+    }
+  ]
+}
