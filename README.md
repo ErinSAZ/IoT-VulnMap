@@ -189,8 +189,6 @@ fields may be missing or incomplete. Also, we have to compare firmware versions 
 vulnerability is relevant for a specific device, which can be complex due to the variety of formats used for firmware
 versions and dates.
 
-##TODO : EXPLIQUER FINALEMENT COMMENT ON A FAIT
-
 ### Axes of improvement
 
 #### Global user interface
