@@ -239,9 +239,6 @@ This would help users keep track of their devices and identify any potential sec
 removed devices. Additionally, we could implement a notification system that alerts users when a device is marked as 
 inactive or removed, allowing them to take appropriate action to secure their network.
 
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ---
 <!-- GETTING STARTED -->
 
@@ -292,3 +289,5 @@ The only requirement to run this project is to have **Docker** and **Docker Comp
 [Python.org]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd55
 
 [Python-url]: https://www.python.org/
+
+<p align="right">(<a href="#About-the-project">back to top</a>)</p>
