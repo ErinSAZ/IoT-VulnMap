@@ -258,12 +258,6 @@ IoT-VulnMap/
 └── requirements.txt
 ```
 ### Installation
-**Before starting**, make sure to change the default database credentials in 'docker-compose.yml' to secure values :
-```yaml
-MYSQL_ROOT_PASSWORD: your_secure_root_password
-MYSQL_USER: your_secure_user
-MYSQL_PASSWORD: your_secure_password
-```
 
 1. Clone the repository
    ```sh
@@ -286,6 +280,13 @@ MYSQL_PASSWORD: your_secure_password
    HA_URL=http://homeassistant.local:8123
    HA_TOKEN=your_home_assistant_long_lived_access_token
    ```
+**Before starting**, make sure to change the default database credentials in 'docker-compose.yml' to secure values :
+```yaml
+MYSQL_ROOT_PASSWORD: your_secure_root_password
+MYSQL_USER: your_secure_user
+MYSQL_PASSWORD: your_secure_password
+```
+
 6. Start the application using Docker Compose
    ```sh
    docker compose up -d
