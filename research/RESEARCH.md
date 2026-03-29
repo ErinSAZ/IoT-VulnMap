@@ -165,6 +165,8 @@ for a large number of devices.
 The script successfully retrieved the list of products associated with each vendor present in the Home Assistant device
 list, using the CIRCL Vulnerability Lookup API. The results were saved in the `ha_products_by_vendor_example` JSON file.
 
+### Go back to [README.md](../README.md)
+
 ---
 
 ## References

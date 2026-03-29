@@ -218,6 +218,8 @@ This would help users keep track of their devices and identify any potential sec
 removed devices. Additionally, we could implement a notification system that alerts users when a device is marked as
 inactive or removed, allowing them to take appropriate action to secure their network.
 
+### More information about the project, including the research process, can be found in the [RESEARCH.md](research/RESEARCH.md) file.
+
 ---
 <!-- GETTING STARTED -->
 
