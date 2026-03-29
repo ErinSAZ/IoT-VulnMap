@@ -53,6 +53,12 @@ information. Additionally, the 'manufacturer' and 'model' fields are not standar
 different names. Also, the API requires the Home Assistant instance to be accessible on the local network, which limits
 the portability of the tool.
 
+### Results
+The script successfully retrieved the list of devices from the Home Assistant instance, along with their associated 
+metadata. The extracted information was saved to the `ha_devices_example` JSON file, which can be used for further 
+processing and analysis. This data serves as the basis for querying the CIRCL Vulnerability Lookup API to identify 
+potential vulnerabilities associated with the devices in the user's Home Assistant instance.
+
 ---
 
 ## CIRCL Vulnerability Lookup API
