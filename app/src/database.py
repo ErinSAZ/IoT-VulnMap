@@ -2,9 +2,15 @@
 This module provides functions to interact with the MySQL database.
 It handles vendors, products, devices and vulnerabilities storage and retrieval.
 """
+import os
 from datetime import datetime
 
 import pymysql
+from dotenv import load_dotenv
+
+load_dotenv()
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 
 def get_connection():
@@ -14,8 +20,8 @@ def get_connection():
     return pymysql.connections.Connection(
         host="localhost",
         port=3307,
-        user="user",
-        password="password",
+        user=DB_USER,
+        password=DB_PASSWORD,
         database="IoT_VulnMap",
         cursorclass=pymysql.cursors.Cursor
     )
@@ -202,6 +208,43 @@ def add_device(name, vendor_id, product_id, firmware):
     return device_id
 
 
+def update_device(device_id, firmware):
+    """
+    Updates a device in the database.
+    :param device_id: id of the device in the database
+    :param name: Friendly name of the device
+    :param firmware: firmware version of the device based on Home Assistant data
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        "UPDATE Device SET firmware_version = %s WHERE id = %s",
+        (firmware, device_id)
+    )
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+
+def device_already_scanned(name):
+    """
+    Checks if a device with the given name already exists in the database.
+    :param name: Friendly name of the device
+    :return: id of the device if it exists else None
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT id FROM Device WHERE name = %s", (name,)
+    )
+    device_already_scanned = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    if device_already_scanned is None:
+        return None
+    return device_already_scanned[0]
+
+
 def device_exists(name, product):
     """
     Checks if a device exists in the database.
@@ -247,6 +290,36 @@ def update_device_auditable_status(device_id, is_auditable):
     connection.commit()
     cursor.close()
     connection.close()
+
+
+def get_devices_with_vulnerabilities():
+    """
+    Retrieves all devices with vulnerabilities.
+    :return: list of devices with vulnerabilities
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+                   SELECT Device.name,
+                          Vendor.name_ha,
+                          Product.name_ha,
+                          Device.firmware_version,
+                          COUNT(Exposes.vulnerability_id) AS vuln_count,
+                          MAX(Vulnerability.cvss_score)   AS max_cvss,
+                          MAX(Vulnerability.severity)     AS max_severity
+                   FROM Device
+                            LEFT JOIN Vendor ON Device.vendor_id = Vendor.id
+                            LEFT JOIN Product ON Device.product_id = Product.id
+                            LEFT JOIN Exposes ON Device.id = Exposes.device_id
+                            LEFT JOIN Vulnerability ON Exposes.vulnerability_id = Vulnerability.id
+                   WHERE Device.is_auditable = TRUE
+                   GROUP BY Device.id
+                   ORDER BY max_cvss DESC
+                   """)
+    rows = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return rows
 
 
 # Vulnerabilities

@@ -9,7 +9,8 @@ import os
 import websocket
 from dotenv import load_dotenv
 
-from database import add_device, add_product, add_vendor, device_exists, product_exists, vendor_exists
+from database import add_device, add_product, add_vendor, device_exists, product_exists, vendor_exists, \
+    device_already_scanned, update_device
 
 # Home Assistant configuration
 load_dotenv()
@@ -76,6 +77,8 @@ def get_devices():
                 product_id = existing_product[0]
 
         # Insert device into database if not already present
-        existing_device = device_exists(entry['name'], entry['model'])
-        if existing_device is None:
+        device_id = device_already_scanned(entry['name'])
+        if device_id is None:
             add_device(entry['name'], vendor_id, product_id, entry['sw_version'])
+        else :
+            update_device(device_id, entry['sw_version'])
