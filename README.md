@@ -18,21 +18,39 @@
     <ol>
         <li>
         <a href="#about-the-project">About The Project</a>
-        <ul>
-            <li><a href="#built-with">Built With</a></li>
-        </ul>
         </li>
         <li>
         <a href="#how-it-works">How it works</a>
         <ul>
             <li><a href="#global-functioning">Global functioning</a></li>
             <li><a href="#key-technical-choices">Key technical choices</a></li>
-            <li><a href="#difficulties-encountered">Difficulties encountered</a></li>
-            <li><a href="#axes-of-improvement">Axes of improvement</a></li>
         </ul>
         </li>
-        <li><a href="#getting-started">Getting Started</a></li>
+        <li>
+        <a href="#difficulties-encountered">Difficulties encountered</a>
+        <ul>
+            <li><a href="#vendor-normalization">Vendor normalization</a></li>
+            <li><a href="#product-normalization">Product normalization</a></li>
+            <li><a href="#vulnerability-parsing">Vulnerability parsing</a></li>
+        </ul>
+        </li>
+        <li>
+        <a href="#axes-of-improvement">Axes of improvement</a>
+        <ul>
+            <li><a href="#global-user-interface">Global user interface</a></li>
+            <li><a href="#data-recovery">Data recovery</a></li>
+            <li><a href="#device-lifecycle-tracking">Device lifecycle tracking</a></li>
+        </ul>
+        </li>
+        <li>
+        <a href="#getting-started">Getting Started</a>
+        <ul>
+            <li><a href="#prerequisites">Prerequisites</a></li>
+            <li><a href="#installation">Installation</a></li>
+        </ul>
+        </li>
         <li><a href="#contributors">Contributors</a></li>
+    </ol>
 </details>
 
 
@@ -144,9 +162,9 @@ but without the necessary information, it is challenging to identify specific vu
 Therefore, the classification of devices into auditable and non-auditable categories helps prioritize the assessment 
 efforts and focus on devices that can be effectively evaluated for vulnerabilities.
 
-### Difficulties encountered
+## Difficulties encountered
 
-#### Vendor normalization
+### Vendor normalization
 
 When retrieving IoT data from Home-Assistant, we found that vendors were not standardized. For example, "Amazon" could 
 be written in different ways such as "Amazon.com", "Amazon Inc.", etc. However, in the CIRCL's instance of Vulnerability 
@@ -156,7 +174,7 @@ are found in the vulnerability lookup API and associates them with the vendors p
 complex and required particular attention to ensure that the data was properly aligned with the standards of the 
 CIRCL's instance of Vulnerability Lookup.
 
-#### Product normalization
+### Product normalization
 
 As the same for vendors, products were not standardized in the data retrieved from Home-Assistant. For example, a 
 product like "Echo Dot" could be referenced in different ways such as "Echo Dot 3rd Gen", "Amazon Echo Dot", etc. This 
@@ -166,7 +184,7 @@ database were aligned with those used by theCIRCL's instance of Vulnerability Lo
 due to the wide variety of IoT products and the different ways they can be referenced. Of course, they might be mistakes 
 in the mapping tables, which could lead to some devices not being properly assessed for vulnerabilities.
 
-#### Vulnerability parsing
+### Vulnerability parsing
 
 When retrieving vulnerability data from the CIRCL's instance of Vulnerability Lookup, we encountered difficulties in 
 parsing the vulnerability information. The instance returns a large amount of data for each vulnerability, including the
@@ -177,9 +195,9 @@ versions and dates.
 
 ##TODO : EXPLIQUER FINALEMENT COMMENT ON A FAIT
 
-### Axes of improvement
+## Axes of improvement
 
-#### Global user interface
+### Global user interface
 To improve the user experience, we could consider developing a web-based interface that allows users to easily view and
 manage the vulnerabilities detected in their IoT devices. This interface could provide a dashboard that displays the 
 list of registered devices, their associated vulnerabilities, and relevant information such as CVE IDs, CVSS scores,
@@ -188,7 +206,7 @@ identify the most critical vulnerabilities and prioritize their remediation effo
 the interface with Home Assistant to allow users to receive real-time notifications about new vulnerabilities detected 
 in their devices and provide recommendations for mitigation.
 
-#### Data recovery
+### Data recovery
 
 To improve data retrieval, we could consider using web scraping techniques to extract additional information about IoT 
 products from online sources such as manufacturer websites, discussion forums, etc. This would allow us to enrich our
@@ -196,7 +214,7 @@ database with additional information about the products, such as technical speci
 Additionally, we could implement an automatic update system to ensure that our database remains up-to-date with the 
 latest information on IoT products and their associated vulnerabilities.
 
-#### Device lifecycle tracking
+### Device lifecycle tracking
 To enhance the functionality of our application, we could implement a device lifecycle tracking system that allows users
 to monitor the status of their IoT devices over time. This system save the last Home Assistant scanning date for each 
 device. If a device has not been detected for a certain period of time, it could be marked as "inactive" or "removed". 
