@@ -15,6 +15,24 @@
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
+    <ol>
+        <li>
+        <a href="#about-the-project">About The Project</a>
+        <ul>
+            <li><a href="#built-with">Built With</a></li>
+        </ul>
+        </li>
+        <li>
+        <a href="#how-it-works">How it works</a>
+        <ul>
+            <li><a href="#global-functioning">Global functioning</a></li>
+            <li><a href="#key-technical-choices">Key technical choices</a></li>
+            <li><a href="#difficulties-encountered">Difficulties encountered</a></li>
+            <li><a href="#axes-of-improvement">Axes of improvement</a></li>
+        </ul>
+        </li>
+        <li><a href="#getting-started">Getting Started</a></li>
+        <li><a href="#contributors">Contributors</a></li>
 </details>
 
 
@@ -36,6 +54,8 @@ identify known CVEs.
 ---
 <!-- HOW IT WORKS -->
 ## How it works
+
+### Global functioning
 
 The application follows a 4-step pipeline:
 
@@ -65,9 +85,6 @@ database. This allows for easy retrieval and analysis of the data, as well as th
 time. The storage process involves designing a database schema that can accommodate the various types of data collected, 
 including device information, vulnerability details, and the relationships between them. This structured storage enables 
 users to easily access and manage the information about their IoT devices and their associated vulnerabilities.
-
-A device is considered **auditable** if it has a known vendor, a known product, and a firmware version, all successfully
-mapped to CIRCL's naming convention.
 
 ### Key technical choices
 
@@ -119,6 +136,13 @@ erDiagram
 #### Pre-established mappings
 
 #### Auditable vs non-auditable
+A device is considered **auditable** if it has a known vendor, a known product, and a firmware version, all successfully
+mapped to CIRCL's naming convention. If any of these criteria are not met, the device is classified as **non-auditable**. 
+This distinction is crucial for the vulnerability assessment process, as only auditable devices can be accurately 
+evaluated against the CIRCL's instance of Vulnerability Lookup. Non-auditable devices may still pose security risks, 
+but without the necessary information, it is challenging to identify specific vulnerabilities associated with them. 
+Therefore, the classification of devices into auditable and non-auditable categories helps prioritize the assessment 
+efforts and focus on devices that can be effectively evaluated for vulnerabilities.
 
 ### Difficulties encountered
 
@@ -172,6 +196,15 @@ database with additional information about the products, such as technical speci
 Additionally, we could implement an automatic update system to ensure that our database remains up-to-date with the 
 latest information on IoT products and their associated vulnerabilities.
 
+#### Device lifecycle tracking
+To enhance the functionality of our application, we could implement a device lifecycle tracking system that allows users
+to monitor the status of their IoT devices over time. This system save the last Home Assistant scanning date for each 
+device. If a device has not been detected for a certain period of time, it could be marked as "inactive" or "removed". 
+This would help users keep track of their devices and identify any potential security risks associated with inactive or 
+removed devices. Additionally, we could implement a notification system that alerts users when a device is marked as 
+inactive or removed, allowing them to take appropriate action to secure their network.
+
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
@@ -192,6 +225,23 @@ The only requirement to run this project is to have **Docker** and **Docker Comp
   ```
 
 ### Installation
+1. Clone the repository
+   ```sh
+   git clone https://github.com/ErinSAZ/IoT-VulnMap.git
+    ```
+2. Navigate to the project directory
+   ```sh
+   cd IoT-VulnMap
+   ```
+3. Create a `.env` file in the root directory of the project and add the following environment variables:
+   ```env
+   HA_URL=http://homeassistant.local:8123
+   HA_TOKEN=your_home_assistant_long_lived_access_token
+   ```
+4. Start the application using Docker Compose
+   ```sh
+   docker compose up -d
+   ```
 
 ---
 <!-- CONTRIBUTORS -->
@@ -199,7 +249,8 @@ The only requirement to run this project is to have **Docker** and **Docker Comp
 ## Contributors:
 
 <!-- MARKDOWN LINKS & IMAGES -->
-
+* [@ErinSAZ](https://github.com/ErinSAZ)
+* [@dechiaragab](https://github.com/dechiaragab)
 
 <!-- Shields.io badges. You can a comprehensive list with many more badges at: https://github.com/inttter/md-badges -->
 
