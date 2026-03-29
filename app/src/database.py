@@ -5,7 +5,6 @@ It handles vendors, products, devices and vulnerabilities storage and retrieval.
 from datetime import datetime
 
 import pymysql
-from pymysql import DATE
 
 
 def get_connection():
@@ -278,15 +277,56 @@ def add_vulnerability(cve_id, cvss, descr, severity, date, device_id):
     else:
         vulnerability_id = existing_vulnerability[0]
 
-    # Get the date
-
     # Link vulnerability to device if not already linked
-    cursor.execute("INSERT INTO Exposes (device_id,vulnerability_id,detected_date) values (%s,%s,%s)",
-                   (device_id, vulnerability_id, datetime.now().date()))
+    cursor.execute(
+        "INSERT INTO Exposes (device_id,vulnerability_id,detected_date) values (%s,%s,%s) ON DUPLICATE KEY UPDATE resolved_date = NULL",
+        (device_id, vulnerability_id, datetime.now().date()))
 
     connection.commit()
     cursor.close()
     connection.close()
+
+
+def get_active_vulnerabilities(device_id):
+    """
+    Retrieves all active vulnerabilities associated with a device.
+    :param device_id: id of the device in the database
+    :return: list of active vulnerabilities
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT cve_id FROM Exposes JOIN Vulnerability v ON Exposes.vulnerability_id = v.id WHERE Exposes.device_id = %s;",
+        (device_id,))
+    results = [row[0] for row in cursor.fetchall()]
+    cursor.close()
+    connection.close()
+    return results
+
+
+def resolve_vulnerability(device_id, cve_id):
+    """
+    Resolves a vulnerability from the database by setting the resolved_date.
+    :param device_id: id of the device in the database
+    :param cve_id: CVE identifier of the vulnerability
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        cursor.execute("""
+                       UPDATE Exposes
+                       SET resolved_date = %s
+                       WHERE device_id = %s
+                         AND vulnerability_id = (SELECT id FROM Vulnerability WHERE cve_id = %s)
+                         AND resolved_date IS NULL
+                       """, (datetime.now().date(), device_id, cve_id))
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        raise e
+    finally:
+        cursor.close()
+        connection.close()
 
 
 def add_exposes(device_id, vulnerability_id, date):

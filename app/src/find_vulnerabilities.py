@@ -4,9 +4,10 @@ for all auditable devices stored in the database and persists the results.
 """
 
 from datetime import date
+
 from packaging.version import Version, InvalidVersion
 
-from database import add_vulnerability, get_auditable_devices
+from database import add_vulnerability, get_auditable_devices, get_active_vulnerabilities, resolve_vulnerability
 from vuln_lookup import get_vulnerabilities
 
 
@@ -20,6 +21,14 @@ def find_all_vulnerabilities():
     for device_id, product_vl, firmware, vendor_vl in devices:
         if not product_vl or not vendor_vl or not firmware:
             continue
+
+        # Retrieve active CVEs for this device from the database before the API call
+        try:
+            active_cves_in_db = set(get_active_vulnerabilities(device_id))
+        except Exception:
+            active_cves_in_db = set()
+
+        cves_found_today = set()
 
         response = get_vulnerabilities(vendor_vl, product_vl)
         entries = response.get('results', {}).get('nvd', [])
@@ -55,6 +64,9 @@ def find_all_vulnerabilities():
             if affected_versions and not is_firmware_affected(firmware, affected_versions):
                 continue
 
+            # Save the CVE ID to the set of CVEs found today for this device
+            cves_found_today.add(cve_id)
+
             try:
                 add_vulnerability(
                     cve_id=cve_id,
@@ -67,22 +79,22 @@ def find_all_vulnerabilities():
             except Exception as e:
                 continue
 
+        # Resolve CVEs that were active in the database but not found in today's API response
+        resolved_cves = active_cves_in_db - cves_found_today
+        for cve_id in resolved_cves:
+            resolve_vulnerability(device_id, cve_id)
+
 
 def extract_cvss(cna_metrics: list, adp_list: list) -> tuple:
     """
     Extracts CVSS score and severity from cna.metrics or adp.metrics.
     Tries cna first, then adp as fallback.
-    :param cna_metrics: metrics list from cna container
-    :param adp_list: list of adp containers
-    :return: tuple (cvss_score, severity)
     """
-    # Try cna metrics first
     for metric in cna_metrics:
         cvss_data = metric.get('cvssV3_1') or metric.get('cvssV3_0') or metric.get('cvssV2_0')
         if cvss_data:
             return cvss_data.get('baseScore'), cvss_data.get('baseSeverity')
 
-    # Fallback to adp metrics
     for adp in adp_list:
         for metric in adp.get('metrics', []):
             cvss_data = metric.get('cvssV3_1') or metric.get('cvssV3_0') or metric.get('cvssV2_0')
@@ -95,14 +107,10 @@ def extract_cvss(cna_metrics: list, adp_list: list) -> tuple:
 def is_firmware_affected(firmware_version: str, versions: list) -> bool:
     """
     Checks if the given firmware version is affected based on the CVE version ranges.
-    :param firmware_version: firmware version string from the device
-    :param versions: list of version dicts from CIRCL's API
-    :return: True if the firmware is affected, False otherwise
     """
     try:
         fw = Version(firmware_version)
     except InvalidVersion:
-        # If version cannot be parsed, assume affected to avoid missing vulnerabilities
         return True
 
     for v in versions:
@@ -121,7 +129,6 @@ def is_firmware_affected(firmware_version: str, versions: list) -> bool:
             if exact and exact not in ('0', '*') and fw == Version(exact):
                 return True
         except InvalidVersion:
-            # If range version cannot be parsed, include the CVE to be safe
             return True
 
     return False

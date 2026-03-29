@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS Exposes
     device_id        INTEGER,
     vulnerability_id INTEGER,
     detected_date    DATE,
+    resolved_date    DATE NULL,
     PRIMARY KEY (device_id, vulnerability_id),
     FOREIGN KEY (device_id) REFERENCES Device (id),
     FOREIGN KEY (vulnerability_id) REFERENCES Vulnerability (id)
