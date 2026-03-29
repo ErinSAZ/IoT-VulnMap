@@ -220,6 +220,10 @@ The only requirement to run this project is to have **Docker** and **Docker Comp
   ```sh
   docker compose version
   ```
+* Python 3.10 or higher
+  ```sh
+  python --version
+  ```
   
 ### Project structure
 ```
@@ -262,12 +266,20 @@ IoT-VulnMap/
    ```sh
    cd IoT-VulnMap
    ```
-3. Create a `.env` file in the root directory of the project and add the following environment variables:
+3. Build the Docker image
+   ```sh
+   docker compose build
+   ```
+4. Install required Python packages
+   ```sh
+   docker compose run app pip install -r requirements.txt
+   ```
+5. Create a `.env` file in the root directory of the project and add the following environment variables:
    ```env
    HA_URL=http://homeassistant.local:8123
    HA_TOKEN=your_home_assistant_long_lived_access_token
    ```
-4. Start the application using Docker Compose
+6. Start the application using Docker Compose
    ```sh
    docker compose up -d
    ```
