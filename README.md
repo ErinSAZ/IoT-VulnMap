@@ -23,7 +23,7 @@
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+![Final operational demonstration](images/Final_demonstration.png)
 
 IoT devices are increasingly present in our homes, yet their security is rarely monitored. **IoT-VulnMap** bridges this
 gap by connecting to a local [Home Assistant](https://www.home-assistant.io) instance, extracting the list of registered
