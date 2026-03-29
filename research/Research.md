@@ -1,6 +1,20 @@
 # Research
 
 ## Table of Contents
+- [Home Assistant API](#home-assistant-api)
+  - [Overview](#overview)
+  - [Findings](#findings)
+  - [Limitations & observations](#limitations--observations)
+- [CIRCL Vulnerability Lookup API](#circl-vulnerability-lookup-api)
+  - [Approach 1 - Web Scraping](#approach-1---web-scraping)
+    - [Overview](#overview-1)
+    - [Findings](#findings-1)
+    - [Limitations & observations](#limitations--observations-1)
+  - [Approach 2 - JSON API](#approach-2---json-api)
+    - [Overview](#overview-2)
+    - [Findings](#findings-2)
+    - [Limitations & observations](#limitations--observations-2)
+- [References](#references)
 
 ## Home Assistant API
 
@@ -126,3 +140,5 @@ for a large number of devices.
 ## References
 - [Home Assistant WebSocket API](https://developers.home-assistant.io/docs/api/websocket/)
 - [CIRCL Vulnerability Lookup](https://vulnerability.circl.lu/)
+
+<p align="right">(<a href="#About-the-project">back to top</a>)</p>
